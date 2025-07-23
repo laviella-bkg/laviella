@@ -67,7 +67,7 @@ export default function HomePage() {
             </div>
             <div className="relative">
               <Image
-                src="/placeholder.svg?height=500&width=600"
+                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
                 alt="La Viella - Vista general de los domos"
                 width={600}
                 height={500}
@@ -117,7 +117,7 @@ export default function HomePage() {
             </div>
             <div className="space-y-6">
               <Image
-                src="/placeholder.svg?height=300&width=500"
+                src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=500&q=80"
                 alt="Interior del domo preparado para concierto"
                 width={500}
                 height={300}
@@ -194,7 +194,7 @@ export default function HomePage() {
                 ></iframe>
               </div>
               <Image
-                src="/placeholder.svg?height=300&width=500"
+                src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=500&q=80"
                 alt="Interior de domo glamping"
                 width={500}
                 height={300}
@@ -240,7 +240,15 @@ export default function HomePage() {
             {[1, 2, 3, 4].map((domo) => (
               <Card key={domo} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <Image
-                  src={`/placeholder.svg?height=200&width=300&query=glamping dome ${domo} exterior view in nature`}
+                  src={
+                    domo === 1
+                      ? "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=300&q=80"
+                      : domo === 2
+                      ? "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=300&q=80"
+                      : domo === 3
+                      ? "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=300&q=80"
+                      : "https://images.unsplash.com/photo-1465101178521-c1a9136a3b41?auto=format&fit=crop&w=300&q=80"
+                  }
                   alt={`Domo ${domo}`}
                   width={300}
                   height={200}

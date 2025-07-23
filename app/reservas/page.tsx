@@ -16,7 +16,7 @@ const domos = [
     price: 120,
     available: true,
     features: ["Vista panorámica", "Terraza privada", "Baño completo"],
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ const domos = [
     price: 140,
     available: true,
     features: ["Jacuzzi privado", "Chimenea", "Cocina equipada"],
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const domos = [
     price: 180,
     available: false,
     features: ["Espacio familiar", "Dos habitaciones", "Sala de estar"],
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80",
   },
   {
     id: 4,
@@ -43,7 +43,7 @@ const domos = [
     price: 130,
     available: true,
     features: ["Rodeado de árboles", "Máxima privacidad", "Observación de aves"],
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
   },
 ]
 
