@@ -1,0 +1,270 @@
+{
+  "domo": {
+    "kind": "collectionType",
+    "collectionName": "domos",
+    "info": {
+      "singularName": "domo",
+      "pluralName": "domos",
+      "displayName": "Domo",
+      "description": "Domo de glamping"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "name": {
+        "type": "string",
+        "required": true,
+        "unique": true
+      },
+      "slug": {
+        "type": "uid",
+        "targetField": "name",
+        "required": true
+      },
+      "description": {
+        "type": "richtext"
+      },
+      "capacity": {
+        "type": "integer",
+        "required": true,
+        "min": 1
+      },
+      "basePrice": {
+        "type": "decimal",
+        "required": true,
+        "min": 0
+      },
+      "isActive": {
+        "type": "boolean",
+        "default": true
+      },
+      "features": {
+        "type": "json"
+      },
+      "amenities": {
+        "type": "json"
+      },
+      "mainImage": {
+        "type": "media",
+        "multiple": false,
+        "required": false,
+        "allowedTypes": ["images"]
+      },
+      "gallery": {
+        "type": "media",
+        "multiple": true,
+        "required": false,
+        "allowedTypes": ["images"]
+      },
+      "location": {
+        "type": "text"
+      },
+      "checkInTime": {
+        "type": "string",
+        "default": "15:00"
+      },
+      "checkOutTime": {
+        "type": "string",
+        "default": "11:00"
+      },
+      "reservations": {
+        "type": "relation",
+        "relation": "oneToMany",
+        "target": "api::reservation.reservation",
+        "mappedBy": "domo"
+      }
+    }
+  },
+  "season": {
+    "kind": "collectionType",
+    "collectionName": "seasons",
+    "info": {
+      "singularName": "season",
+      "pluralName": "seasons",
+      "displayName": "Season",
+      "description": "Temporadas de precios"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "startDate": {
+        "type": "date",
+        "required": true
+      },
+      "endDate": {
+        "type": "date",
+        "required": true
+      },
+      "priceMultiplier": {
+        "type": "decimal",
+        "required": true,
+        "min": 0
+      },
+      "isActive": {
+        "type": "boolean",
+        "default": true
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
+  "reservation": {
+    "kind": "collectionType",
+    "collectionName": "reservations",
+    "info": {
+      "singularName": "reservation",
+      "pluralName": "reservations",
+      "displayName": "Reservation",
+      "description": "Reservas de domos"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "domo": {
+        "type": "relation",
+        "relation": "manyToOne",
+        "target": "api::domo.domo",
+        "inversedBy": "reservations",
+        "required": true
+      },
+      "guestName": {
+        "type": "string",
+        "required": true
+      },
+      "guestEmail": {
+        "type": "email",
+        "required": true
+      },
+      "guestPhone": {
+        "type": "string"
+      },
+      "checkIn": {
+        "type": "date",
+        "required": true
+      },
+      "checkOut": {
+        "type": "date",
+        "required": true
+      },
+      "totalPrice": {
+        "type": "decimal",
+        "required": true
+      },
+      "status": {
+        "type": "enumeration",
+        "enum": ["draft", "confirmed", "cancelled", "completed"],
+        "default": "draft"
+      },
+      "paymentStatus": {
+        "type": "enumeration",
+        "enum": ["pending", "paid", "failed", "refunded"],
+        "default": "pending"
+      },
+      "specialRequests": {
+        "type": "text"
+      },
+      "numberOfGuests": {
+        "type": "integer",
+        "required": true,
+        "min": 1
+      }
+    }
+  },
+  "page": {
+    "kind": "collectionType",
+    "collectionName": "pages",
+    "info": {
+      "singularName": "page",
+      "pluralName": "pages",
+      "displayName": "Page",
+      "description": "Páginas del sitio"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "title": {
+        "type": "string",
+        "required": true
+      },
+      "slug": {
+        "type": "uid",
+        "targetField": "title",
+        "required": true
+      },
+      "content": {
+        "type": "richtext"
+      },
+      "metaDescription": {
+        "type": "text"
+      },
+      "isActive": {
+        "type": "boolean",
+        "default": true
+      },
+      "seoTitle": {
+        "type": "string"
+      },
+      "seoKeywords": {
+        "type": "text"
+      }
+    }
+  },
+  "testimonial": {
+    "kind": "collectionType",
+    "collectionName": "testimonials",
+    "info": {
+      "singularName": "testimonial",
+      "pluralName": "testimonials",
+      "displayName": "Testimonial",
+      "description": "Testimonios de huéspedes"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "guestName": {
+        "type": "string",
+        "required": true
+      },
+      "rating": {
+        "type": "integer",
+        "required": true,
+        "min": 1,
+        "max": 5
+      },
+      "comment": {
+        "type": "text",
+        "required": true
+      },
+      "isApproved": {
+        "type": "boolean",
+        "default": false
+      },
+      "guestImage": {
+        "type": "media",
+        "multiple": false,
+        "required": false,
+        "allowedTypes": ["images"]
+      },
+      "domo": {
+        "type": "relation",
+        "relation": "manyToOne",
+        "target": "api::domo.domo"
+      }
+    }
+  }
+} 

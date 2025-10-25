@@ -1,0 +1,85 @@
+{
+  "kind": "collectionType",
+  "collectionName": "domos",
+  "info": {
+    "singularName": "domo",
+    "pluralName": "domos",
+    "displayName": "Domo"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "capacity": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "basePrice": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "features": {
+      "type": "json"
+    },
+    "amenities": {
+      "type": "json"
+    },
+    "mainImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "gallery": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "location": {
+      "type": "text"
+    },
+    "checkInTime": {
+      "type": "string",
+      "default": "15:00"
+    },
+    "checkOutTime": {
+      "type": "string",
+      "default": "11:00"
+    },
+    "reservations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::reservation.reservation",
+      "mappedBy": "domo"
+    },
+    "testimonials": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::testimonial.testimonial",
+      "mappedBy": "domo"
+    }
+  }
+}

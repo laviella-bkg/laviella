@@ -3,6 +3,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { getDomos, getTestimonials } from "@/lib/strapi"
 import {
   MapPin,
   Calendar,
@@ -17,69 +18,6 @@ import {
   TreePine,
   Bird,
 } from "lucide-react"
-
-const domos = [
-  {
-    id: 1,
-    name: "Domo Estrella",
-    capacity: "2-3 personas",
-    price: 120,
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-    features: ["Vista panorámica", "Terraza privada", "Baño completo"],
-    rating: 4.9,
-  },
-  {
-    id: 2,
-    name: "Domo Luna",
-    capacity: "2-4 personas",
-    price: 140,
-    image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
-    features: ["Jacuzzi privado", "Chimenea", "Cocina equipada"],
-    rating: 4.8,
-  },
-  {
-    id: 3,
-    name: "Domo Sol",
-    capacity: "4-6 personas",
-    price: 180,
-    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80",
-    features: ["Espacio familiar", "Dos habitaciones", "Sala de estar"],
-    rating: 4.9,
-  },
-  {
-    id: 4,
-    name: "Domo Bosque",
-    capacity: "2-3 personas",
-    price: 130,
-    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
-    features: ["Rodeado de árboles", "Máxima privacidad", "Observación de aves"],
-    rating: 5.0,
-  },
-]
-
-const testimonials = [
-  {
-    name: "María González",
-    location: "Madrid",
-    rating: 5,
-    comment: "Una experiencia increíble. Despertar rodeado de naturaleza en un domo tan cómodo fue mágico.",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=150&q=80",
-  },
-  {
-    name: "Carlos Ruiz",
-    location: "Barcelona",
-    rating: 5,
-    comment: "Perfecto para desconectar. El domo tenía todas las comodidades y la vista era espectacular.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-  },
-  {
-    name: "Ana Martín",
-    location: "Valencia",
-    rating: 5,
-    comment: "Ideal para una escapada romántica. El jacuzzi bajo las estrellas fue inolvidable.",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80",
-  },
-]
 
 const activities = [
   {
@@ -104,7 +42,149 @@ const activities = [
   },
 ]
 
-export default function HomePage() {
+// Helper function to get image URL from Strapi media
+function getStrapiImageUrl(image: any): string {
+  if (!image) return "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
+  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"
+  
+  // Support both Strapi v4 (nested) and v5 (flat) structures
+  let imageUrl = null
+  if (image.data) {
+    imageUrl = image.data.attributes?.url || image.data.url
+  } else {
+    imageUrl = image.url
+  }
+  
+  if (!imageUrl) return "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
+  
+  // If URL already includes base URL, return as is, otherwise prepend base URL
+  return imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`
+}
+
+// Helper function to format domo data from Strapi
+function formatDomoFromStrapi(domo: any) {
+  // Support both Strapi v4 (with attributes) and Strapi v5 (flat structure)
+  const attributes = domo.attributes || domo
+  // Handle features - could be array or JSON object
+  let features = []
+  if (Array.isArray(attributes.features)) {
+    features = attributes.features
+  } else if (typeof attributes.features === 'object' && attributes.features !== null) {
+    // If it's a JSON object, convert to array
+    features = Object.values(attributes.features).filter(Boolean)
+  }
+  
+  return {
+    id: domo.id,
+    name: attributes.name || "Sin nombre",
+    slug: attributes.slug || `domo-${domo.id}`,
+    capacity: `${attributes.capacity || 2} personas`,
+    price: parseFloat(attributes.basePrice || 100),
+    image: getStrapiImageUrl(attributes.mainImage),
+    features: features,
+    rating: 4.9, // Default rating since it's not in the schema
+    description: attributes.description || "",
+    amenities: attributes.amenities || {},
+  }
+}
+
+export default async function HomePage() {
+  // Fetch data from Strapi
+  let domosData = []
+  let testimonialsData = []
+
+  // Fetch data with proper error handling
+  try {
+    const [domosResponse, testimonialsResponse] = await Promise.allSettled([
+      getDomos(),
+      getTestimonials(),
+    ])
+    
+    domosData = domosResponse.status === 'fulfilled' ? (domosResponse.value || []) : []
+    testimonialsData = testimonialsResponse.status === 'fulfilled' ? (testimonialsResponse.value || []) : []
+  } catch (error) {
+    // Silent fallback for errors
+    domosData = []
+    testimonialsData = []
+  }
+
+  // Format domos data
+  const domos = domosData.map(formatDomoFromStrapi)
+
+  // Use fallback data if no domos found
+  const domosToShow = domos.length > 0 ? domos : [
+    {
+      id: 1,
+      name: "Domo Estrella",
+      capacity: "2-3 personas",
+      price: 120,
+      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+      features: ["Vista panorámica", "Terraza privada", "Baño completo"],
+      rating: 4.9,
+    },
+    {
+      id: 2,
+      name: "Domo Luna",
+      capacity: "2-4 personas",
+      price: 140,
+      image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
+      features: ["Jacuzzi privado", "Chimenea", "Cocina equipada"],
+      rating: 4.8,
+    },
+    {
+      id: 3,
+      name: "Domo Sol",
+      capacity: "4-6 personas",
+      price: 180,
+      image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80",
+      features: ["Espacio familiar", "Dos habitaciones", "Sala de estar"],
+      rating: 4.9,
+    },
+    {
+      id: 4,
+      name: "Domo Bosque",
+      capacity: "2-3 personas",
+      price: 130,
+      image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
+      features: ["Rodeado de árboles", "Máxima privacidad", "Observación de aves"],
+      rating: 5.0,
+    },
+  ]
+
+  // Use testimonials from Strapi if available
+  const testimonials = testimonialsData.length > 0 ? testimonialsData.map((t: any) => {
+    const attrs = t.attributes || t
+    return {
+      name: attrs.name || "Anónimo",
+      location: attrs.location || "",
+      rating: 5,
+      comment: attrs.comment || "",
+      image: getStrapiImageUrl(attrs.avatar),
+    }
+  }) : [
+    {
+      name: "María González",
+      location: "Madrid",
+      rating: 5,
+      comment: "Una experiencia increíble. Despertar rodeado de naturaleza en un domo tan cómodo fue mágico.",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=150&q=80",
+    },
+    {
+      name: "Carlos Ruiz",
+      location: "Barcelona",
+      rating: 5,
+      comment: "Perfecto para desconectar. El domo tenía todas las comodidades y la vista era espectacular.",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    },
+    {
+      name: "Ana Martín",
+      location: "Valencia",
+      rating: 5,
+      comment: "Ideal para una escapada romántica. El jacuzzi bajo las estrellas fue inolvidable.",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80",
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -303,7 +383,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {domos.map((domo) => (
+            {domosToShow.map((domo) => (
               <Card key={domo.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
                 <div className="relative">
                   <Image
@@ -369,7 +449,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                      <Link href={`/domo/${domo.id}`} className="flex-1">
+                      <Link href={`/domo/${domo.slug}`} className="flex-1">
                         <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Ver Detalles</Button>
                       </Link>
                       <Link href="/reservas">
