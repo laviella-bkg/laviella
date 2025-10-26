@@ -28,6 +28,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'better-addition-cf5edce2eb.strapiapp.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.media.strapiapp.com',
+      },
     ],
   },
 }
