@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: process.env.NODE_ENV === 'development',
+    unoptimized: false, // Cambiar a true solo si usas Vercel sin optimización de imágenes
     remotePatterns: [
       {
         protocol: 'http',
@@ -23,6 +23,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'better-addition-cf5edce2eb.strapiapp.com',
       },
     ],
   },
