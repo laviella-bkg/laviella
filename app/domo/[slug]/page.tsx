@@ -1,10 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import type { PriceCalculation } from "@/lib/strapi"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { getDomo } from "@/lib/strapi"
+import { 
+  getDomo, 
+  getStrapiMediaUrl, 
+  normalizeStrapiData, 
+  getTestimonialsByDomo, 
+  getBookedDates, 
+  calculatePriceWithSeasons
+} from "@/lib/strapi"
+import type { Domo, PriceCalculation } from "@/lib/strapi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
@@ -37,7 +46,12 @@ export default function DomoPage() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [guests, setGuests] = useState(2)
+  const [priceCalculation, setPriceCalculation] = useState<PriceCalculation | null>(null)
+  const [loadingPrice, setLoadingPrice] = useState(false)
+  const [testimonials, setTestimonials] = useState<any[]>([])
+  const [bookedDates, setBookedDates] = useState<string[]>([])
 
+  // Fetch domo data
   useEffect(() => {
     const fetchDomo = async () => {
       try {
@@ -46,6 +60,16 @@ export default function DomoPage() {
         const domoData = await getDomo(slug)
         if (domoData) {
           setDomo(domoData)
+          
+          // Load testimonials for this domo
+          if (domoData.id) {
+            const domoTestimonials = await getTestimonialsByDomo(domoData.id)
+            setTestimonials(domoTestimonials)
+            
+            // Load booked dates for calendar
+            const booked = await getBookedDates(domoData.id)
+            setBookedDates(booked)
+          }
         } else {
           setError("Domo no encontrado")
         }
@@ -65,24 +89,34 @@ export default function DomoPage() {
     }
   }, [slug])
 
-  function getStrapiImageUrl(image: any): string {
-    if (!image) return "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-    const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"
-    
-    // Support both Strapi v4 (nested) and v5 (flat) structures
-    let imageUrl = null
-    if (image.data) {
-      imageUrl = image.data.attributes?.url || image.data.url
-    } else {
-      imageUrl = image.url
+  // Calculate price with seasons when dates are selected
+  // IMPORTANTE: Este hook debe estar ANTES de los returns tempranos
+  useEffect(() => {
+    const calculatePrice = async () => {
+      if (selectedDates.length > 1 && domo) {
+        setLoadingPrice(true)
+        try {
+          const normalizedDomo = normalizeStrapiData<Domo>(domo)
+          const calc = await calculatePriceWithSeasons(
+            normalizedDomo,
+            selectedDates[0],
+            selectedDates[selectedDates.length - 1]
+          )
+          setPriceCalculation(calc)
+        } catch (error) {
+          console.error('Error calculating price:', error)
+          setPriceCalculation(null)
+        } finally {
+          setLoadingPrice(false)
+        }
+      } else {
+        setPriceCalculation(null)
+      }
     }
-    
-    if (!imageUrl) return "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-    
-    // If URL already includes base URL, return as is, otherwise prepend base URL
-    return imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`
-  }
+    calculatePrice()
+  }, [selectedDates, domo])
 
+  // Early returns DESPUÉS de todos los hooks
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -107,13 +141,14 @@ export default function DomoPage() {
     )
   }
 
-  // Support both Strapi v4 (with attributes) and Strapi v5 (flat structure)
-  const attributes = domo.attributes || domo
-  const mainImage = getStrapiImageUrl(attributes.mainImage)
-  const gallery = Array.isArray(attributes.gallery) ? attributes.gallery : (attributes.gallery?.data || [])
-  const images = [mainImage, ...gallery.map((img: any) => getStrapiImageUrl(img))]
-
-  const totalPrice = selectedDates.length > 1 ? parseFloat(attributes.basePrice || 100) * (selectedDates.length - 1) : parseFloat(attributes.basePrice || 100)
+  // Normalize domo data after checking it exists
+  const normalizedDomo = normalizeStrapiData<Domo>(domo)
+  const mainImage = getStrapiMediaUrl(normalizedDomo.mainImage)
+  const gallery = Array.isArray(normalizedDomo.gallery) ? normalizedDomo.gallery : []
+  const images = [
+    mainImage,
+    ...gallery.map((img: any) => getStrapiMediaUrl(img))
+  ].filter(Boolean)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -135,7 +170,7 @@ export default function DomoPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">{attributes.name}</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">{normalizedDomo.name}</h1>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
                   <Star className="h-5 w-5 text-yellow-400 fill-current mr-1" />
@@ -144,16 +179,16 @@ export default function DomoPage() {
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Users className="h-5 w-5 mr-1" />
-                  <span>Capacidad: {attributes.capacity} personas</span>
+                  <span>Capacidad: {normalizedDomo.capacity} personas</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <MapPin className="h-5 w-5 mr-1" />
-                  <span>La Viella, Naturaleza</span>
+                  <span>{normalizedDomo.location || "La Viella, Naturaleza"}</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-emerald-700">${attributes.basePrice}</div>
+              <div className="text-3xl font-bold text-emerald-700">${normalizedDomo.basePrice}</div>
               <div className="text-gray-600">por noche</div>
             </div>
           </div>
@@ -165,9 +200,9 @@ export default function DomoPage() {
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative rounded-2xl overflow-hidden">
-                <Image
-                  src={images[selectedImage] || "/placeholder.svg"}
-                  alt={`${attributes.name} - Imagen ${selectedImage + 1}`}
+                  <Image
+                    src={images[selectedImage] || "/placeholder.svg"}
+                    alt={`${normalizedDomo.name} - Imagen ${selectedImage + 1}`}
                   width={800}
                   height={500}
                   className="w-full h-[500px] object-cover"
@@ -185,7 +220,7 @@ export default function DomoPage() {
                     >
                       <Image
                         src={image || "/placeholder.svg"}
-                        alt={`${attributes.name} - Miniatura ${index + 1}`}
+                        alt={`${normalizedDomo.name} - Miniatura ${index + 1}`}
                         width={200}
                         height={150}
                         className="w-full h-24 object-cover"
@@ -202,24 +237,27 @@ export default function DomoPage() {
                 <CardTitle>Descripción</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 leading-relaxed">
-                  {attributes.description || "Descripción del domo..."}
-                </p>
+                <div 
+                  className="text-gray-600 leading-relaxed prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: normalizedDomo.description || "Descripción del domo..." }}
+                />
               </CardContent>
             </Card>
 
             {/* Features */}
-            {attributes.features && Array.isArray(attributes.features) && attributes.features.length > 0 && (
+            {normalizedDomo.features && (
               <Card>
                 <CardHeader>
                   <CardTitle>Características Destacadas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {attributes.features.map((feature: string, index: number) => (
+                    {(Array.isArray(normalizedDomo.features) 
+                      ? normalizedDomo.features 
+                      : Object.values(normalizedDomo.features || {})).map((feature: any, index: number) => (
                       <div key={index} className="flex items-center">
                         <Check className="h-5 w-5 text-emerald-600 mr-3" />
-                        <span>{feature}</span>
+                        <span>{typeof feature === 'string' ? feature : feature.name || feature.label || String(feature)}</span>
                       </div>
                     ))}
                   </div>
@@ -271,7 +309,7 @@ export default function DomoPage() {
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Check-in / Check-out</h4>
                   <p className="text-gray-600">
-                    Check-in: {attributes.checkInTime || "15:00"} hrs | Check-out: {attributes.checkOutTime || "11:00"} hrs
+                    Check-in: {normalizedDomo.checkInTime || "15:00"} hrs | Check-out: {normalizedDomo.checkOutTime || "11:00"} hrs
                   </p>
                 </div>
                 <Separator />
@@ -281,6 +319,34 @@ export default function DomoPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Testimonials */}
+            {testimonials.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Testimonios de Huéspedes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {testimonials.slice(0, 3).map((testimonial: any, index: number) => (
+                      <div key={index} className="border-b last:border-0 pb-4 last:pb-0">
+                        <div className="flex items-center mb-2">
+                          <div className="flex text-yellow-400">
+                            {[...Array(testimonial.rating || 5)].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 fill-current" />
+                            ))}
+                          </div>
+                          <span className="ml-2 font-semibold text-gray-900">
+                            {testimonial.guestName}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 italic">"{testimonial.comment}"</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Booking */}
@@ -301,7 +367,21 @@ export default function DomoPage() {
                     selected={selectedDates}
                     onSelect={(dates) => setSelectedDates(dates || [])}
                     className="rounded-md border"
+                    disabled={(date) => {
+                      // Disable past dates
+                      if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                        return true
+                      }
+                      // Disable booked dates
+                      const dateStr = date.toISOString().split('T')[0]
+                      return bookedDates.includes(dateStr)
+                    }}
                   />
+                  {bookedDates.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Las fechas marcadas no están disponibles
+                    </p>
+                  )}
                 </div>
 
                 {/* Guests */}
@@ -312,7 +392,7 @@ export default function DomoPage() {
                     onChange={(e) => setGuests(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
-                    {Array.from({ length: attributes.capacity || 6 }, (_, i) => i + 1).map((num) => (
+                    {Array.from({ length: normalizedDomo.capacity || 6 }, (_, i) => i + 1).map((num) => (
                       <option key={num} value={num}>
                         {num} {num === 1 ? "huésped" : "huéspedes"}
                       </option>
@@ -323,27 +403,66 @@ export default function DomoPage() {
                 {/* Price Summary */}
                 {selectedDates.length > 1 && (
                   <div className="space-y-2 pt-4 border-t">
-                    <div className="flex justify-between">
-                      <span>
-                        ${attributes.basePrice} x {selectedDates.length - 1} noches
-                      </span>
-                      <span>${totalPrice}</span>
-                    </div>
-                    <div className="flex justify-between font-semibold text-lg">
-                      <span>Total</span>
-                      <span className="text-emerald-700">${totalPrice}</span>
-                    </div>
+                    {loadingPrice ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                        <span className="ml-2 text-sm text-gray-600">Calculando precio...</span>
+                      </div>
+                    ) : priceCalculation ? (
+                      <>
+                        {priceCalculation.seasons.length > 0 && (
+                          <div className="space-y-1 mb-2">
+                            {priceCalculation.seasons.map((season: any, idx: number) => (
+                              <div key={idx} className="flex justify-between text-sm">
+                                <span className="text-gray-600">
+                                  Temporada ({season.nights} noche{season.nights !== 1 ? 's' : ''})
+                                </span>
+                                <span>${season.price.toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span>
+                            ${priceCalculation.basePrice} x {priceCalculation.nights} noche{priceCalculation.nights !== 1 ? 's' : ''}
+                          </span>
+                          <span>${priceCalculation.subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Limpieza</span>
+                          <span>${priceCalculation.fees.cleaning.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Tasas</span>
+                          <span>${priceCalculation.fees.taxes.toFixed(2)}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between font-semibold text-lg">
+                          <span>Total</span>
+                          <span className="text-emerald-700">${priceCalculation.total.toFixed(2)}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between">
+                        <span>
+                          ${normalizedDomo.basePrice} x {selectedDates.length - 1} noche{(selectedDates.length - 1) !== 1 ? 's' : ''}
+                        </span>
+                        <span>${(normalizedDomo.basePrice * (selectedDates.length - 1)).toFixed(2)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Book Button */}
-                <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  size="lg"
-                  disabled={selectedDates.length < 2}
-                >
-                  {selectedDates.length < 2 ? "Selecciona fechas" : "Reservar Ahora"}
-                </Button>
+                <Link href={`/reservas?domo=${normalizedDomo.slug}${selectedDates.length >= 2 ? `&checkIn=${selectedDates[0].toISOString().split('T')[0]}&checkOut=${selectedDates[selectedDates.length - 1].toISOString().split('T')[0]}` : ''}`}>
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    size="lg"
+                    disabled={selectedDates.length < 2}
+                  >
+                    {selectedDates.length < 2 ? "Selecciona fechas" : "Reservar Ahora"}
+                  </Button>
+                </Link>
 
                 <p className="text-sm text-gray-600 text-center">
                   No se realizará ningún cargo hasta confirmar la reserva
