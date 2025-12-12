@@ -1,30 +1,59 @@
-# Domos landing page
+# La Viella Glamping
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+Sitio web para reservas de domos glamping, construido con Next.js 15 y integrado con Strapi CMS.
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/agrojas-projects/v0-domos-landing-page)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/msRbVf2M6qA)
+[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 
-## Overview
+## 📚 Documentación
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+La documentación del proyecto está organizada en el directorio [`docs/`](./docs/):
 
-## Deployment
+- **[Seguridad](./docs/security/)** - Análisis de seguridad OWASP, vulnerabilidades y correcciones
+- **[Despliegue](./docs/deployment/)** - Guías de configuración para Vercel y variables de entorno
+- **[Desarrollo](./docs/development/)** - Documentación para desarrolladores
 
-Your project is live at:
+## 🚀 Inicio Rápido
 
-**[https://vercel.com/agrojas-projects/v0-domos-landing-page](https://vercel.com/agrojas-projects/v0-domos-landing-page)**
+```bash
+# Instalar dependencias
+npm install
+# o
+pnpm install
 
-## Build your app
+# Configurar variables de entorno
+cp env.local.example .env.local
+# Editar .env.local con tus valores
 
-Continue building your app on:
+# Ejecutar en desarrollo
+npm run dev
+# o
+pnpm dev
+```
 
-**[https://v0.dev/chat/projects/msRbVf2M6qA](https://v0.dev/chat/projects/msRbVf2M6qA)**
+Visita [http://localhost:3000](http://localhost:3000) para ver la aplicación.
 
-## How It Works
+## 📋 Documentos Importantes
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- **Variables de Entorno**: Ver [docs/deployment/VERCEL_ENV_VARS.md](./docs/deployment/VERCEL_ENV_VARS.md)
+- **Análisis de Seguridad**: Ver [docs/security/OWASP_SECURITY_ANALYSIS.md](./docs/security/OWASP_SECURITY_ANALYSIS.md)
+- **Correcciones de Seguridad**: Ver [docs/security/SECURITY_FIXES.md](./docs/security/SECURITY_FIXES.md)
+
+## 🛠️ Stack Tecnológico
+
+- **Framework**: Next.js 15 (App Router)
+- **Lenguaje**: TypeScript
+- **CMS Backend**: Strapi 5.29.0
+- **UI**: Tailwind CSS + Shadcn UI
+- **Deployment**: Vercel
+
+## 📝 Notas
+
+Este proyecto se integra con un backend Strapi para gestionar:
+- Domos y disponibilidad
+- Reservas
+- Temporadas y precios
+- Testimonios
+- Páginas dinámicas
+
+Para más detalles sobre la integración, ver la documentación en [`docs/`](./docs/).
