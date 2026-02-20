@@ -11,5 +11,13 @@ Este directorio contiene toda la documentación del proyecto La Viella Glamping.
 ## Documentos Principales
 
 - **README.md** (raíz) - Información general del proyecto
-- **docs/security/** - Análisis de seguridad, vulnerabilidades y correcciones
-- **docs/deployment/** - Configuración de Vercel, variables de entorno, etc.
+- **[security/](./security/)** - Análisis de seguridad, vulnerabilidades y correcciones
+- **[deployment/](./deployment/)** - Configuración de Vercel, variables de entorno, etc.
+- **[development/](./development/)** - Documentación técnica: flujos, arquitectura, etc.
+
+## Acceso Rápido
+
+- 📋 [Flujo de Reservas](./development/RESERVATION_FLOW.md)
+- 🔒 [Análisis de Seguridad OWASP](./security/OWASP_SECURITY_ANALYSIS.md)
+- 🔧 [Correcciones de Seguridad](./security/SECURITY_FIXES.md)
+- 🌐 [Variables de Entorno Vercel](./deployment/VERCEL_ENV_VARS.md)
