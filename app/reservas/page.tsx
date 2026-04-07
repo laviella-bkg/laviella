@@ -25,6 +25,7 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react"
+import { format } from "date-fns"
 import {
   getDomos,
   createReservation,
@@ -69,6 +70,9 @@ function ReservasContent() {
     guestPhone: "",
     specialRequests: "",
   })
+
+  // Contact/WhatsApp form data
+  const [contactForm, setContactForm] = useState({ nombre: '', consulta: '' })
 
   // Price calculation states
   const [priceCalculation, setPriceCalculation] = useState<PriceCalculation | null>(null)
@@ -271,6 +275,26 @@ function ReservasContent() {
       ...prev,
       [e.target.name]: e.target.value
     }))
+  }
+
+  function handleContactSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
+    if (!whatsappNumber) return
+
+    const domo = selectedDomo?.name || 'un domo'
+    const desde = selectedDates?.from ? format(selectedDates.from, 'dd/MM/yyyy') : ''
+    const hasta = selectedDates?.to ? format(selectedDates.to, 'dd/MM/yyyy') : ''
+
+    const mensaje = [
+      `Hola! Soy ${contactForm.nombre}.`,
+      desde && hasta ? `Me interesa reservar ${domo} del ${desde} al ${hasta}.` : `Me interesa reservar ${domo}.`,
+      contactForm.consulta ? `Consulta: ${contactForm.consulta}` : '',
+    ].filter(Boolean).join(' ')
+
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`, '_blank')
+    setShowContactForm(false)
+    setContactForm({ nombre: '', consulta: '' })
   }
 
   return (
@@ -760,10 +784,15 @@ function ReservasContent() {
                   <CardDescription className="font-dm-sans text-viella-brown">¿Tienes preguntas específicas? Contáctanos directamente</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form className="space-y-4">
+                  <form onSubmit={handleContactSubmit} className="space-y-4">
                     <div>
                       <label className="block text-sm font-dm-sans font-medium text-viella-deep mb-2">Nombre</label>
-                      <Input type="text" placeholder="Tu nombre" />
+                      <Input
+                        type="text"
+                        placeholder="Tu nombre"
+                        value={contactForm.nombre}
+                        onChange={e => setContactForm(p => ({ ...p, nombre: e.target.value }))}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-dm-sans font-medium text-viella-deep mb-2">WhatsApp / Teléfono</label>
@@ -771,7 +800,12 @@ function ReservasContent() {
                     </div>
                     <div>
                       <label className="block text-sm font-dm-sans font-medium text-viella-deep mb-2">Consulta</label>
-                      <Textarea rows={3} placeholder="¿En qué podemos ayudarte?" />
+                      <Textarea
+                        rows={3}
+                        placeholder="¿En qué podemos ayudarte?"
+                        value={contactForm.consulta}
+                        onChange={e => setContactForm(p => ({ ...p, consulta: e.target.value }))}
+                      />
                     </div>
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1 bg-viella-accent text-viella-cream hover:bg-viella-deep font-dm-sans">
