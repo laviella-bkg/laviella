@@ -1,9 +1,8 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import Link from "next/link"
 import { getPage, getPages } from "@/lib/strapi"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft, Leaf } from "lucide-react"
+import { NavBar } from "@/components/sections/nav-bar"
+import { Footer } from "@/components/sections/footer"
 
 export const dynamicParams = true // Allow dynamic params to handle 404 gracefully
 
@@ -26,9 +25,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const page = await getPage(params.slug)
+  const { slug } = await params
+  const page = await getPage(slug)
 
   if (!page) {
     return {
@@ -48,52 +48,36 @@ export async function generateMetadata({
   }
 }
 
-export default async function DynamicPage({ params }: { params: { slug: string } }) {
-  const page = await getPage(params.slug)
+export default async function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const page = await getPage(slug)
 
   if (!page) {
     notFound()
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center text-emerald-800 hover:text-emerald-900">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            <div className="flex items-center space-x-2">
-              <Leaf className="h-6 w-6 text-emerald-600" />
-              <span className="text-xl font-bold">La Viella Glamping</span>
-            </div>
-          </Link>
+    <>
+      <NavBar />
+      <div className="min-h-screen bg-viella-sand">
+        {/* Header de página */}
+        <div className="bg-viella-sand border-b border-viella-beige py-16">
+          <div className="max-w-3xl mx-auto px-6">
+            <h1 className="font-cormorant font-semibold text-viella-deep text-5xl">
+              {page.title}
+            </h1>
+            <div className="mt-4 h-px w-16 bg-viella-accent" />
+          </div>
         </div>
-      </nav>
-
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{page.title}</h1>
-        </div>
-
-        {/* Page Content */}
-        <div className="prose prose-lg max-w-none">
+        {/* Cuerpo del artículo */}
+        <main className="max-w-[720px] mx-auto px-6 py-16">
           <div
-            className="text-gray-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: page.content }}
+            className="font-dm-sans text-viella-olive text-base font-light leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: page.content ?? '' }}
           />
-        </div>
-
-        {/* Back Button */}
-        <div className="mt-12">
-          <Link href="/">
-            <Button variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver al inicio
-            </Button>
-          </Link>
-        </div>
+        </main>
       </div>
-    </div>
+      <Footer />
+    </>
   )
 }

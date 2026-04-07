@@ -57,7 +57,8 @@ function getJWT(): string | null {
 
 // Interface para opciones de fetch con soporte de autenticación
 interface StrapiFetchOptions extends RequestInit {
-  useAuth?: boolean; // Si es true, usa JWT en lugar de API Token
+  useAuth?: boolean;  // Si es true, usa JWT en lugar de API Token
+  noAuth?: boolean;   // Si es true, no envía ningún token (usa rol público)
 }
 
 /**
@@ -84,17 +85,15 @@ export async function fetchAPI<T>(
   };
   
   // Determine which token to use
-  if (options.useAuth) {
+  if (options.noAuth) {
+    // Explicitly no token — use Strapi public role permissions
+  } else if (options.useAuth) {
     // For authenticated operations, use JWT token
     const jwt = getJWT();
     if (jwt) {
       headers['Authorization'] = `Bearer ${jwt}`;
-    } else {
-      // If JWT not available but useAuth is true, try API token as fallback
-      // This allows API Token with full access to work for authenticated operations
-      if (STRAPI_API_TOKEN) {
-        headers['Authorization'] = `Bearer ${STRAPI_API_TOKEN}`;
-      }
+    } else if (STRAPI_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${STRAPI_API_TOKEN}`;
     }
   } else {
     // For public read operations, use API Token
@@ -253,10 +252,11 @@ export async function getDomosWithAvailability(
 export async function createReservation(
   reservationData: Partial<Reservation>
 ): Promise<Reservation> {
+  const jwt = typeof window !== 'undefined' ? localStorage.getItem('strapi_jwt') : null;
   const data = await fetchAPI<StrapiData<Reservation>>('/reservations', {
     method: 'POST',
     body: JSON.stringify({ data: reservationData }),
-    useAuth: true, // Use JWT token if available, otherwise API Token
+    ...(jwt ? { useAuth: true } : { noAuth: true }),
   });
   return normalizeStrapiData<Reservation>(data.data);
 }
@@ -631,4 +631,21 @@ export async function calculatePriceWithSeasons(
     },
     total,
   };
-} 
+}
+
+// ============================================================================
+// CONTACT
+// ============================================================================
+
+export async function submitContactMessage(data: {
+  nombre: string;
+  email: string;
+  telefono?: string;
+  mensaje: string;
+}): Promise<void> {
+  await fetchAPI('/contact-messages', {
+    method: 'POST',
+    body: JSON.stringify({ data }),
+    noAuth: true,
+  });
+}

@@ -3,7 +3,6 @@ import type { Config } from "tailwindcss";
 // all in fixtures is set to tailwind v3 as interims solutions
 
 const config: Config = {
-    darkMode: ["class"],
     content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -62,7 +61,19 @@ const config: Config = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			'viella-cream': '#f4f1ed',
+  			'viella-sand': '#efebe5',
+  			'viella-beige': '#dbd5cc',
+  			'viella-brown': '#71665c',
+  			'viella-olive': '#60604c',
+  			'viella-deep': '#3c3530',
+  			'viella-accent': '#623e2a',
+  		},
+  		fontFamily: {
+  			cormorant: ['var(--font-cormorant)', 'Georgia', 'serif'],
+  			'dm-sans': ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+  			dancing: ['var(--font-dancing)', 'cursive'],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
