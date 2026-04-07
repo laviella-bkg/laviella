@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import DOMPurify from "isomorphic-dompurify"
+import sanitizeHtml from "sanitize-html"
 import { getPage, getPages } from "@/lib/strapi"
 import { NavBar } from "@/components/sections/nav-bar"
 import { Footer } from "@/components/sections/footer"
@@ -74,7 +74,17 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
         <main className="max-w-[720px] mx-auto px-6 py-16">
           <div
             className="font-dm-sans text-viella-olive text-base font-light leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content ?? '') }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(page.content ?? "", {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2"]),
+                allowedAttributes: {
+                  ...sanitizeHtml.defaults.allowedAttributes,
+                  a: ["href", "name", "target", "rel"],
+                  img: ["src", "alt", "title", "width", "height", "loading"],
+                },
+                allowedSchemes: ["http", "https", "mailto", "tel"],
+              }),
+            }}
           />
         </main>
       </div>
