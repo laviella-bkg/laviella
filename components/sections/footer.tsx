@@ -1,18 +1,17 @@
 import Link from 'next/link'
 
 const navLinks = [
-  { href: '/', label: 'Inicio' },
+  { href: '/#about', label: 'Nosotros' },
   { href: '/#domos', label: 'Domos' },
-  { href: '/reservas', label: 'Reservar' },
-  { href: '/contacto', label: 'Contacto' },
+  { href: '/#experiencias', label: 'Experiencias' },
+  { href: '/#reservas', label: 'Reservas' },
 ]
 
-// TODO: Reemplazar con datos reales cuando el cliente los provea
 const contactInfo = {
-  phone: null as string | null,
-  email: null as string | null,
-  instagram: null as string | null,
-  whatsapp: null as string | null,
+  phone: '+54 223 423 5266',
+  email: 'laviella.glamp@gmail.com',
+  instagram: 'https://www.instagram.com/',
+  whatsapp: 'https://wa.me/542234235266',
   tiktok: null as string | null,
 }
 
@@ -21,20 +20,16 @@ export function Footer() {
 
   return (
     <footer className="bg-viella-deep border-t border-viella-beige/20">
-      <div className={`max-w-5xl mx-auto px-6 py-12 grid gap-8 ${hasContactInfo ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-        {/* Col 1: Marca */}
+      <div className={`viella-shell grid gap-8 py-12 ${hasContactInfo ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
         <div>
-          <p className="font-cormorant font-semibold text-viella-cream text-2xl">
-            La Viella
-          </p>
-          <p className="font-dm-sans text-viella-brown text-xs font-light mt-1">
-            Glamping & Domos · Sierras de Córdoba
+          <p className="font-cormorant text-2xl font-semibold text-viella-cream">La Viella</p>
+          <p className="mt-1 font-dm-sans text-xs font-light uppercase tracking-[0.24em] text-viella-brown">
+            Glamping & Domo · Sierra de los Padres
           </p>
         </div>
 
-        {/* Col 2: Navegación */}
         <div>
-          <p className="font-dm-sans text-viella-beige text-xs uppercase tracking-widest mb-4">
+          <p className="mb-4 font-dm-sans text-xs uppercase tracking-widest text-viella-beige">
             Navegación
           </p>
           <div className="flex flex-col gap-2">

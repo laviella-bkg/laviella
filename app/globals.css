@@ -18,6 +18,7 @@
     --viella-olive: #60604c;
     --viella-deep: #3c3530;
     --viella-accent: #623e2a;
+    --viella-muted: #b9afa2;
 
     /* shadcn tokens remapeados a paleta viella (HSL) */
     --background: 33 27% 94%;
@@ -58,5 +59,23 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-dm-sans), sans-serif;
+    background-image:
+      radial-gradient(circle at top, rgba(255, 255, 255, 0.55), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 16%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(98, 62, 42, 0.18);
+  }
+}
+
+@layer components {
+  .viella-shell {
+    @apply mx-auto w-full max-w-6xl px-6 md:px-10;
+  }
+
+  .viella-kicker {
+    @apply font-dm-sans text-[0.72rem] uppercase tracking-[0.38em] text-viella-brown/75;
   }
 }

@@ -1,47 +1,68 @@
-import { Flame, Coffee, Waves, Star } from 'lucide-react'
+import Image from 'next/image'
 import { SectionHeader } from './section-header'
 
-const servicios = [
+interface OutdoorArea {
+  title: string
+  description: string
+  imageUrl?: string | null
+}
+
+const serviciosBase = [
   {
-    icon: Flame,
     title: 'Fogón',
-    description: 'Noches alrededor del fuego bajo las estrellas',
+    description:
+      'Fogón común ubicado entre el domo Sauco y el principal. Cuenta con leña para iniciar el fuego y un disco para cocinar.',
   },
   {
-    icon: Coffee,
     title: 'Matera',
-    description: 'Despertate con vista y mate en mano',
+    description:
+      'Al lado del fogón hay un sector con techo con heladera, bacha, pava, cocina, ollas, utensilios, mesa y sillas.',
   },
   {
-    icon: Waves,
     title: 'Pileta',
-    description: 'Refrescate en plena sierra',
-  },
-  {
-    icon: Star,
-    title: 'Cielo estrellado',
-    description: 'Astronomía lejos de la ciudad',
+    description:
+      'Alejado de los domos, el tanque australiano con deck de madera suma sombra, cortinas y una atmósfera serena para los días de sol.',
   },
 ]
 
-export function ServiciosSection() {
+export function ServiciosSection({ images = [] }: { images?: Array<string | null> }) {
+  const servicios: OutdoorArea[] = serviciosBase.map((item, index) => ({
+    ...item,
+    imageUrl: images[index] ?? null,
+  }))
+
   return (
-    <section className="bg-viella-cream py-20">
-      <div className="max-w-5xl mx-auto px-6">
-        <SectionHeader scriptText="experiencias" title="Más que alojamiento" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {servicios.map((s) => (
-            <div key={s.title} className="text-center">
-              <div className="flex justify-center mb-4">
-                <s.icon size={32} className="text-viella-accent" strokeWidth={1.5} />
+    <section id="experiencias" className="bg-viella-sand py-24 md:py-32">
+      <div className="viella-shell">
+        <SectionHeader
+          scriptText="Sectores exteriores"
+          title="Rituales compartidos, tardes sin prisa"
+          subtitle="La experiencia no termina en el domo: también se vive entre fuego, sombra, madera y paisaje."
+        />
+        <div className="space-y-14">
+          {servicios.map((s, index) => (
+            <article
+              key={s.title}
+              className={`grid gap-8 lg:grid-cols-2 lg:items-center ${index % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''}`}
+            >
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] shadow-[0_24px_70px_rgba(60,53,48,0.1)]">
+                {s.imageUrl ? (
+                  <Image src={s.imageUrl} alt={s.title} fill className="object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#d9d1c6,#b7ab9f)]" />
+                )}
               </div>
-              <h3 className="font-cormorant font-semibold text-viella-deep text-xl mb-2">
-                {s.title}
-              </h3>
-              <p className="font-dm-sans text-viella-brown text-sm font-light leading-relaxed">
-                {s.description}
-              </p>
-            </div>
+              <div className="max-w-xl px-2">
+                <p className="viella-kicker mb-3">Espacio exterior</p>
+                <h3 className="font-cormorant text-4xl font-semibold text-viella-deep md:text-5xl">
+                  {s.title}
+                </h3>
+                <p className="mt-5 font-dm-sans text-base font-light leading-8 text-viella-brown">
+                  {s.description}
+                </p>
+                <div className="mt-6 h-px w-24 bg-viella-accent/30" />
+              </div>
+            </article>
           ))}
         </div>
       </div>

@@ -28,8 +28,7 @@ export function HeroSection({
       : 'text-[2.5rem] md:text-[3.5rem]'
 
   return (
-    <section className={`relative flex items-center justify-center ${heightClass}`}>
-      {/* Imagen de fondo */}
+    <section className={`relative flex items-center justify-center overflow-hidden ${heightClass}`}>
       {imageUrl ? (
         <Image
           src={imageUrl}
@@ -42,28 +41,31 @@ export function HeroSection({
         <div className="absolute inset-0 bg-viella-deep z-0" />
       )}
 
-      {/* Overlay gradiente */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-[rgba(60,53,48,0.35)] to-[rgba(60,53,48,0.65)]" />
+      <div className="absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(25,21,19,0.22)_0%,rgba(25,21,19,0.35)_35%,rgba(25,21,19,0.72)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 z-10 h-40 bg-[linear-gradient(180deg,transparent,rgba(239,235,229,0.96))]" />
 
-      {/* Contenido */}
-      <div className="relative z-20 text-center px-6 max-w-2xl mx-auto">
-        <p className="font-dancing text-viella-beige text-lg mb-2">{scriptText}</p>
+      <div className="relative z-20 mx-auto flex w-full max-w-6xl items-end px-6 pb-24 pt-32 md:px-10">
+        <div className="max-w-3xl">
+        <p className="mb-5 font-dm-sans text-[0.72rem] uppercase tracking-[0.55em] text-white/82">
+          {scriptText}
+        </p>
         <h1
-          className={`font-cormorant font-semibold text-viella-cream leading-none ${titleSize}`}
+          className={`font-cormorant font-semibold leading-[0.9] text-viella-beige drop-shadow-[0_16px_40px_rgba(0,0,0,0.28)] ${titleSize}`}
         >
           {title}
         </h1>
         {subtitle && (
-          <p className="font-dm-sans text-viella-beige text-xs uppercase tracking-[0.2em] mt-4">
+          <p className="mt-6 max-w-md font-dm-sans text-sm uppercase tracking-[0.32em] text-white/80 md:text-[0.82rem]">
             {subtitle}
           </p>
         )}
         <Link
           href={ctaHref}
-          className="inline-block mt-8 px-8 py-3 border border-viella-cream text-viella-cream font-dm-sans text-xs uppercase tracking-widest hover:bg-viella-cream hover:text-viella-deep transition-colors duration-200"
+          className="mt-10 inline-flex rounded-full border border-white/35 px-8 py-3 font-dm-sans text-[0.72rem] uppercase tracking-[0.34em] text-white transition-colors duration-200 hover:bg-white hover:text-viella-deep"
         >
           {ctaLabel}
         </Link>
+        </div>
       </div>
     </section>
   )

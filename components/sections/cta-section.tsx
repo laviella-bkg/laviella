@@ -1,38 +1,69 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
-// Cambiar a true cuando el cliente entregue public/cta-bg.jpg
-const CTA_IMAGE_READY = false
-
-export function CTASection() {
-  const hasImage = CTA_IMAGE_READY
-
+export function CTASection({ imageUrl }: { imageUrl?: string | null }) {
   return (
-    <section className="relative py-32 flex items-center justify-center overflow-hidden">
-      {hasImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src="/cta-bg.jpg"
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        />
-      ) : (
-        <div className="absolute inset-0 bg-viella-deep z-0" />
-      )}
-      <div className="absolute inset-0 bg-[rgba(60,53,48,0.7)] z-10" />
-      <div className="relative z-20 text-center px-6 max-w-xl mx-auto">
-        <h2 className="font-cormorant font-semibold text-viella-cream text-5xl leading-tight">
-          ¿Listo para desconectarte?
-        </h2>
-        <p className="font-dm-sans text-viella-beige text-sm font-light mt-4">
-          Reservas disponibles todo el año
-        </p>
-        <Link
-          href="/reservas"
-          className="inline-block mt-8 px-10 py-3 bg-viella-accent text-viella-cream font-dm-sans text-xs uppercase tracking-widest hover:bg-viella-deep transition-colors duration-200"
-        >
-          Reservar ahora
-        </Link>
+    <section id="reservas" className="relative overflow-hidden bg-viella-deep py-24 text-viella-cream md:py-32">
+      <div className="absolute inset-0 opacity-30">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt=""
+            aria-hidden
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,#6e6258,#352f2b)]" />
+        )}
+      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,18,17,0.9),rgba(22,18,17,0.78))]" />
+      <div className="viella-shell relative z-10 grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
+        <div className="max-w-xl">
+          <p className="viella-kicker mb-4 text-viella-beige/75">Reservas</p>
+          <h2 className="font-cormorant text-5xl font-semibold leading-[0.92] text-viella-cream md:text-6xl">
+            Planificá tu estadía con calma.
+          </h2>
+          <p className="mt-6 max-w-lg font-dm-sans text-base font-light leading-8 text-viella-beige/82">
+            Horarios de atención, contacto y ubicación para reservar tu próxima escapada
+            entre domos, naturaleza y tiempo lento.
+          </p>
+          <Link
+            href="/reservas"
+            className="mt-10 inline-flex rounded-full bg-viella-cream px-8 py-3 font-dm-sans text-[0.72rem] uppercase tracking-[0.34em] text-viella-deep transition-colors hover:bg-white"
+          >
+            Reservar ahora
+          </Link>
+        </div>
+
+        <div className="grid gap-6 rounded-[2rem] border border-white/10 bg-white/6 p-7 backdrop-blur-sm md:grid-cols-2 md:p-9">
+          <div>
+            <p className="viella-kicker mb-3 text-viella-beige/75">Horarios de atención</p>
+            <p className="font-cormorant text-2xl text-viella-cream">Lunes a viernes</p>
+            <p className="mt-1 font-dm-sans text-sm font-light text-viella-beige/80">
+              9:00 am - 9:00 pm
+            </p>
+            <p className="mt-5 font-cormorant text-2xl text-viella-cream">Sábado y domingo</p>
+            <p className="mt-1 font-dm-sans text-sm font-light text-viella-beige/80">
+              10:00 am - 7:00 pm
+            </p>
+          </div>
+          <div>
+            <p className="viella-kicker mb-3 text-viella-beige/75">Información</p>
+            <p className="font-dm-sans text-sm font-light leading-7 text-viella-beige/84">
+              Sierra de los Padres
+              <br />
+              Ciudad de Roma y Río Blanco
+              <br />
+              +54 223 423 5266
+              <br />
+              laviella.glamp@gmail.com
+            </p>
+            <p className="mt-5 font-dm-sans text-sm uppercase tracking-[0.24em] text-viella-beige/72">
+              ¡Etiquetanos!
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )
