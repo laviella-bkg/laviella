@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
+import DOMPurify from "isomorphic-dompurify"
 import Link from "next/link"
 import Image from "next/image"
 import type { DateRange } from "react-day-picker"
@@ -164,8 +165,16 @@ export default function DomoPage() {
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-yellow-400 fill-current mr-1" />
-                    <span className="font-dm-sans font-semibold text-viella-deep">4.9</span>
-                    <span className="font-dm-sans text-viella-brown ml-1">(Reviews)</span>
+                    {testimonials.length > 0 ? (
+                      <>
+                        <span className="font-dm-sans font-semibold text-viella-deep">
+                          {(testimonials.reduce((sum, t) => sum + (t.rating || 0), 0) / testimonials.length).toFixed(1)}
+                        </span>
+                        <span className="font-dm-sans text-viella-brown ml-1">({testimonials.length} {testimonials.length === 1 ? 'reseña' : 'reseñas'})</span>
+                      </>
+                    ) : (
+                      <span className="font-dm-sans text-viella-brown ml-1">Sin reseñas aún</span>
+                    )}
                   </div>
                   <div className="flex items-center text-viella-brown font-dm-sans">
                     <Users className="h-5 w-5 mr-1" />
@@ -229,7 +238,7 @@ export default function DomoPage() {
                 <CardContent>
                   <div
                     className="font-dm-sans text-viella-brown leading-relaxed prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: normalizedDomo.description || "Descripción del domo..." }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(normalizedDomo.description || "Descripción del domo...") }}
                   />
                 </CardContent>
               </Card>
