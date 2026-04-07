@@ -631,4 +631,21 @@ export async function calculatePriceWithSeasons(
     },
     total,
   };
-} 
+}
+
+// ============================================================================
+// CONTACT
+// ============================================================================
+
+export async function submitContactMessage(data: {
+  nombre: string;
+  email: string;
+  telefono?: string;
+  mensaje: string;
+}): Promise<void> {
+  await fetchAPI('/contact-messages', {
+    method: 'POST',
+    body: JSON.stringify({ data }),
+    noAuth: true,
+  });
+}

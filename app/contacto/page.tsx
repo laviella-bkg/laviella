@@ -5,19 +5,40 @@ import { NavBar } from '@/components/sections/nav-bar'
 import { Footer } from '@/components/sections/footer'
 import { useToast } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
+import { submitContactMessage } from '@/lib/strapi'
 
 export default function ContactoPage() {
   const { toast } = useToast()
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    // TODO (backlog C-06): conectar a API real
-    setSubmitted(true)
-    toast({
-      title: '¡Mensaje enviado!',
-      description: 'Te contactaremos pronto.',
-    })
+    const form = e.currentTarget
+    const formData = new FormData(form)
+
+    setLoading(true)
+    try {
+      await submitContactMessage({
+        nombre: formData.get('nombre') as string,
+        email: formData.get('email') as string,
+        telefono: formData.get('telefono') as string || undefined,
+        mensaje: formData.get('mensaje') as string,
+      })
+      setSubmitted(true)
+      toast({
+        title: '¡Mensaje enviado!',
+        description: 'Te contactaremos pronto.',
+      })
+    } catch {
+      toast({
+        title: 'Error al enviar',
+        description: 'No pudimos enviar tu mensaje. Intentá de nuevo.',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -86,10 +107,10 @@ export default function ContactoPage() {
             </div>
             <button
               type="submit"
-              disabled={submitted}
+              disabled={submitted || loading}
               className="w-full bg-viella-accent text-viella-cream font-dm-sans text-xs uppercase tracking-widest py-4 hover:bg-viella-deep transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitted ? 'Enviado' : 'Enviar mensaje'}
+              {submitted ? 'Enviado' : loading ? 'Enviando...' : 'Enviar mensaje'}
             </button>
           </form>
         </main>
