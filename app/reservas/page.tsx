@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -36,7 +36,7 @@ import type { Domo, PriceCalculation } from "@/lib/strapi"
 import { NavBar } from "@/components/sections/nav-bar"
 import { Footer } from "@/components/sections/footer"
 
-export default function ReservasPage() {
+function ReservasContent() {
   const searchParams = useSearchParams()
 
   // Data states
@@ -836,5 +836,13 @@ export default function ReservasPage() {
       </div>
       <Footer />
     </>
+  )
+}
+
+export default function ReservasPage() {
+  return (
+    <Suspense>
+      <ReservasContent />
+    </Suspense>
   )
 }
