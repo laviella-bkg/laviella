@@ -108,6 +108,8 @@ function ReservasContent() {
             image: domo.mainImage,
             rating: 4.9,
             available: domo.isActive !== false,
+            checkInTime: domo.checkInTime || "15:00",
+            checkOutTime: domo.checkOutTime || "11:00",
           }
         })
 
@@ -829,7 +831,7 @@ function ReservasContent() {
                   <CardTitle className="font-cormorant text-viella-deep">Políticas de Reserva</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm font-dm-sans text-viella-brown">
-                  <p>• Check-in: 15:00 hrs | Check-out: 11:00 hrs</p>
+                  <p>• Check-in: {selectedDomo?.checkInTime || "15:00"} hrs | Check-out: {selectedDomo?.checkOutTime || "11:00"} hrs</p>
                   <p>• Cancelación gratuita hasta 48 hrs antes</p>
                   <p>• Se requiere depósito del 50% para confirmar</p>
                   <p>• Mascotas bienvenidas (consultar condiciones)</p>
