@@ -49,11 +49,11 @@ export function getStrapiMediaUrl(
 
   // Handle nested data structure (Strapi v4/v5)
   const mediaData = media.data || media;
-  const mediaAttrs = mediaData?.attributes || mediaData || media;
+  const mediaAttrs: StrapiMedia = mediaData?.attributes || mediaData || media;
 
   // Try to get format-specific URL first
   if (format && mediaAttrs?.formats?.[format]?.url) {
-    imageUrl = mediaAttrs.formats[format].url;
+    imageUrl = mediaAttrs.formats[format]!.url;
   } else if (mediaAttrs?.url) {
     imageUrl = mediaAttrs.url;
   } else if (mediaData?.url) {

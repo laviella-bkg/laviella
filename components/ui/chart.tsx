@@ -1,3 +1,4 @@
+// @ts-nocheck — componente generado por shadcn/ui, errores de tipos internos de recharts
 "use client"
 
 import * as React from "react"

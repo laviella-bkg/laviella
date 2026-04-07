@@ -575,11 +575,11 @@ function ReservasContent() {
                                   </div>
                                   <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
                                     <span>Limpieza</span>
-                                    <span>${priceCalculation.fees.cleaning.toFixed(2)}</span>
+                                    <span>${priceCalculation.fees?.cleaning?.toFixed(2) ?? '0.00'}</span>
                                   </div>
                                   <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
                                     <span>Tasas</span>
-                                    <span>${priceCalculation.fees.taxes.toFixed(2)}</span>
+                                    <span>${priceCalculation.fees?.taxes?.toFixed(2) ?? '0.00'}</span>
                                   </div>
                                   <Separator className="bg-viella-beige" />
                                   <div className="flex justify-between font-dm-sans font-semibold text-lg">

@@ -27,12 +27,6 @@ const nextConfig = {
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }]
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     unoptimized: false, // Cambiar a true solo si usas Vercel sin optimización de imágenes
     remotePatterns: [
