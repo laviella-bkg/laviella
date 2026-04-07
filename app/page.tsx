@@ -8,17 +8,10 @@ import { ServiciosSection } from '@/components/sections/servicios-section'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
 import { CTASection } from '@/components/sections/cta-section'
 import { Footer } from '@/components/sections/footer'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Suspense } from 'react'
+import type { Testimonial } from '@/lib/types/strapi'
+import { getTestimonials } from '@/lib/strapi'
 
-async function DomosSection() {
-  let domos: any[] = []
-  try {
-    domos = await getDomos()
-  } catch {
-    return null
-  }
-
+function DomosSection({ domos }: { domos: any[] }) {
   return (
     <section id="domos" className="bg-viella-sand py-20">
       <div className="max-w-5xl mx-auto px-6">
@@ -39,34 +32,18 @@ async function DomosSection() {
   )
 }
 
-function DomosSkeleton() {
-  return (
-    <section className="bg-viella-sand py-20">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <Skeleton className="h-5 w-32 mx-auto mb-2 bg-viella-beige" />
-          <Skeleton className="h-10 w-64 mx-auto bg-viella-beige" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-[360px] rounded-lg bg-viella-beige" />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 export default async function HomePage() {
-  // Obtener imagen hero del primer domo
+  let domos: any[] = []
+  let testimonials: Testimonial[] = []
   let heroImageUrl: string | null = null
+
   try {
-    const domos = await getDomos()
+    ;[domos, testimonials] = await Promise.all([getDomos(), getTestimonials()])
     if (domos.length > 0) {
       heroImageUrl = getStrapiMediaUrl(domos[0].mainImage)
     }
   } catch {
-    // fallback a fondo sólido
+    // fallbacks: fondo sólido y secciones dependientes de API vacías
   }
 
   return (
@@ -81,13 +58,9 @@ export default async function HomePage() {
         ctaHref="/reservas"
       />
       <IntroSection />
-      <Suspense fallback={<DomosSkeleton />}>
-        <DomosSection />
-      </Suspense>
+      <DomosSection domos={domos} />
       <ServiciosSection />
-      <Suspense fallback={null}>
-        <TestimonialsSection />
-      </Suspense>
+      <TestimonialsSection testimonials={testimonials} />
       <CTASection />
       <Footer />
     </>

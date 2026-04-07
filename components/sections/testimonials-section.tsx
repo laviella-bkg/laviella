@@ -1,6 +1,5 @@
 import { Star } from 'lucide-react'
 import { SectionHeader } from './section-header'
-import { getTestimonials } from '@/lib/strapi'
 import type { Testimonial } from '@/lib/types/strapi'
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
@@ -37,14 +36,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   )
 }
 
-export async function TestimonialsSection() {
-  let testimonials: Testimonial[] = []
-  try {
-    testimonials = await getTestimonials()
-  } catch {
-    return null
-  }
-
+export function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
   if (!testimonials.length) return null
 
   return (
