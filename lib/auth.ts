@@ -19,7 +19,7 @@ export interface LoginResponse {
     id: number;
     username: string;
     email: string;
-    role?: { id: number; name: string; type: string };
+    isAdmin?: boolean;
     [key: string]: any;
   };
 }
@@ -37,11 +37,9 @@ export interface RegisterData {
  * Login user and get JWT token
  */
 export async function loginUser(credentials: LoginCredentials): Promise<LoginResponse> {
-  const response = await fetch(`${STRAPI_URL}/api/auth/local?populate=role`, {
+  const response = await fetch(`${STRAPI_URL}/api/auth/local`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
   });
 
@@ -51,13 +49,21 @@ export async function loginUser(credentials: LoginCredentials): Promise<LoginRes
   }
 
   const data: LoginResponse = await response.json();
-  
-  // Store JWT in localStorage
+
+  // Fetch full user to get isAdmin field
+  const meResponse = await fetch(`${STRAPI_URL}/api/users/me`, {
+    headers: { 'Authorization': `Bearer ${data.jwt}` },
+  });
+  if (meResponse.ok) {
+    const me = await meResponse.json();
+    data.user = { ...data.user, isAdmin: me.isAdmin ?? false };
+  }
+
   if (typeof window !== 'undefined') {
     localStorage.setItem('jwt', data.jwt);
     localStorage.setItem('user', JSON.stringify(data.user));
   }
-  
+
   return data;
 }
 
@@ -132,11 +138,11 @@ export function isAuthenticated(): boolean {
 }
 
 /**
- * Check if current user has admin role
+ * Check if current user has admin access
  */
 export function isAdmin(): boolean {
   const user = getCurrentUser();
-  return user?.role?.type === 'admin';
+  return user?.isAdmin === true;
 }
 
 /**
