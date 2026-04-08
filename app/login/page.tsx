@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { loginUser, registerUser, isAuthenticated } from "@/lib/auth"
+import { loginUser, registerUser, isAuthenticated, isAdmin } from "@/lib/auth"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [loadingRegister, setLoadingRegister] = useState(false)
 
   useEffect(() => {
-    if (isAuthenticated()) router.replace("/mis-reservas")
+    if (isAuthenticated()) router.replace(isAdmin() ? "/admin" : "/mis-reservas")
   }, [router])
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
@@ -32,7 +32,7 @@ export default function LoginPage() {
     const password = (form.elements.namedItem("password") as HTMLInputElement).value
     try {
       await loginUser({ identifier, password })
-      router.push("/mis-reservas")
+      router.push(isAdmin() ? "/admin" : "/mis-reservas")
     } catch (err: any) {
       setLoginError(err.message || "Email o contraseña incorrectos")
     } finally {
