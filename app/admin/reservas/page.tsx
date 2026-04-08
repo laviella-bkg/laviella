@@ -42,7 +42,7 @@ export default function AdminReservasPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [domos, setDomos] = useState<Domo[]>([])
   const [loading, setLoading] = useState(true)
-  const [updatingId, setUpdatingId] = useState<number | null>(null)
+  const [updatingId, setUpdatingId] = useState<number | string | null>(null)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
   const [search, setSearch] = useState("")
@@ -79,13 +79,13 @@ export default function AdminReservasPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  async function handleStatusChange(id: number | undefined, status: string) {
-    if (id === undefined) return
-    setUpdatingId(id)
+  async function handleStatusChange(documentId: string | undefined, numericId: number | undefined, status: string) {
+    if (!documentId) return
+    setUpdatingId(numericId ?? null)
     try {
-      const updated = await updateReservationStatus(id, status)
+      const updated = await updateReservationStatus(documentId, status)
       setReservations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, reservationStatus: updated.reservationStatus } : r))
+        prev.map((r) => (r.documentId === documentId ? { ...r, reservationStatus: updated.reservationStatus } : r))
       )
       showToast(`Reserva ${STATUS_LABEL[status].toLowerCase()}`, true)
     } catch {
@@ -194,7 +194,7 @@ export default function AdminReservasPage() {
                           <div className="flex gap-2">
                             <button
                               disabled={isUpdating}
-                              onClick={() => handleStatusChange(r.id, "confirmed")}
+                              onClick={() => handleStatusChange(r.documentId, r.id, "confirmed")}
                               className="flex items-center gap-1 font-dm-sans text-xs text-green-700 hover:text-green-900 disabled:opacity-50 transition-colors"
                             >
                               <CheckCircle size={13} />
@@ -202,7 +202,7 @@ export default function AdminReservasPage() {
                             </button>
                             <button
                               disabled={isUpdating}
-                              onClick={() => handleStatusChange(r.id, "cancelled")}
+                              onClick={() => handleStatusChange(r.documentId, r.id, "cancelled")}
                               className="flex items-center gap-1 font-dm-sans text-xs text-red-600 hover:text-red-800 disabled:opacity-50 transition-colors"
                             >
                               <XCircle size={13} />
@@ -213,7 +213,7 @@ export default function AdminReservasPage() {
                         {status === "confirmed" && (
                           <button
                             disabled={isUpdating}
-                            onClick={() => handleStatusChange(r.id, "cancelled")}
+                            onClick={() => handleStatusChange(r.documentId, r.id, "cancelled")}
                             className="flex items-center gap-1 font-dm-sans text-xs text-red-600 hover:text-red-800 disabled:opacity-50 transition-colors"
                           >
                             <XCircle size={13} />
