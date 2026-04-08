@@ -7,6 +7,13 @@ interface OutdoorArea {
   imageUrl?: string | null
 }
 
+interface ServiciosSectionProps {
+  images?: Array<string | null>
+  title?: string
+  subtitle?: string
+  items?: Array<{ title: string; description?: string; imageUrl?: string | null }>
+}
+
 const serviciosBase = [
   {
     title: 'Fogón',
@@ -25,19 +32,30 @@ const serviciosBase = [
   },
 ]
 
-export function ServiciosSection({ images = [] }: { images?: Array<string | null> }) {
-  const servicios: OutdoorArea[] = serviciosBase.map((item, index) => ({
-    ...item,
-    imageUrl: images[index] ?? null,
-  }))
+export function ServiciosSection({
+  images = [],
+  title,
+  subtitle,
+  items,
+}: ServiciosSectionProps) {
+  const servicios: OutdoorArea[] = items
+    ? items.map((item) => ({
+        title: item.title,
+        description: item.description ?? '',
+        imageUrl: item.imageUrl ?? null,
+      }))
+    : serviciosBase.map((item, index) => ({
+        ...item,
+        imageUrl: images[index] ?? null,
+      }))
 
   return (
     <section id="experiencias" className="bg-viella-sand py-24 md:py-32">
       <div className="viella-shell">
         <SectionHeader
           scriptText="Sectores exteriores"
-          title="Rituales compartidos, tardes sin prisa"
-          subtitle="La experiencia no termina en el domo: también se vive entre fuego, sombra, madera y paisaje."
+          title={title ?? 'Rituales compartidos, tardes sin prisa'}
+          subtitle={subtitle ?? 'La experiencia no termina en el domo: también se vive entre fuego, sombra, madera y paisaje.'}
         />
         <div className="space-y-14">
           {servicios.map((s, index) => (
