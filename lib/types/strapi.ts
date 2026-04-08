@@ -157,6 +157,41 @@ export interface StrapiData<T> {
   [key: string]: any;
 }
 
+// Home Page Single Type
+export interface HomePageServicio {
+  id: number;
+  title: string;
+  description?: string;
+  image?: StrapiMedia | null;
+}
+
+export interface HomePageContent {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroCtaLabel?: string;
+  heroImage?: StrapiMedia | null;
+  aboutTitle?: string;
+  aboutDescription?: string;
+  aboutLocationTitle?: string;
+  aboutLocationSubtitle?: string;
+  aboutClimaTitle?: string;
+  aboutClimaSubtitle?: string;
+  aboutImage?: StrapiMedia | null;
+  serviciosTitle?: string;
+  serviciosSubtitle?: string;
+  servicios?: HomePageServicio[];
+  ctaTitle?: string;
+  ctaDescription?: string;
+  ctaHoursWeekdaysLabel?: string;
+  ctaHoursWeekdays?: string;
+  ctaHoursWeekendLabel?: string;
+  ctaHoursWeekend?: string;
+  ctaAddress?: string;
+  ctaPhone?: string;
+  ctaEmail?: string;
+  ctaImage?: StrapiMedia | null;
+}
+
 // Price calculation result
 export interface PriceCalculation {
   basePrice: number;

@@ -11,6 +11,7 @@ export type {
   PriceCalculation,
   StrapiResponse,
   StrapiData,
+  HomePageContent,
 } from './types/strapi';
 
 export {
@@ -30,6 +31,7 @@ import type {
   StrapiResponse,
   StrapiData,
   PriceCalculation,
+  HomePageContent,
 } from './types/strapi';
 
 import { normalizeStrapiData, normalizeStrapiArray, buildStrapiQuery, calculateNights } from './utils/strapi';
@@ -631,6 +633,27 @@ export async function calculatePriceWithSeasons(
     },
     total,
   };
+}
+
+// ============================================================================
+// HOME PAGE
+// ============================================================================
+
+/**
+ * Gets the Home Page Single Type content from Strapi with full media population.
+ * Returns null if the content type doesn't exist yet or on any error — the frontend
+ * uses hardcoded fallbacks in that case.
+ */
+export async function getHomePage(): Promise<HomePageContent | null> {
+  try {
+    const res = await fetchAPI<any>(
+      '/home-page?populate[heroImage]=true&populate[aboutImage]=true&populate[ctaImage]=true&populate[servicios][populate][image]=true'
+    );
+    if (!res?.data) return null;
+    return normalizeStrapiData(res.data) as HomePageContent;
+  } catch {
+    return null;
+  }
 }
 
 // ============================================================================
