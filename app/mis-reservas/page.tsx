@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Calendar, MapPin, Users, LogOut } from "lucide-react"
+import { Calendar, MapPin, Users, LogOut, XCircle, AlertCircle, CheckCircle } from "lucide-react"
 import { NavBar } from "@/components/sections/nav-bar"
 import { Footer } from "@/components/sections/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getReservations } from "@/lib/strapi"
+import { getReservations, updateReservationStatus } from "@/lib/strapi"
 import { getCurrentUser, isAuthenticated, logoutUser } from "@/lib/auth"
 import type { Reservation } from "@/lib/types/strapi"
 
@@ -38,6 +38,8 @@ export default function MisReservasPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<{ username: string; email: string } | null>(null)
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -59,6 +61,28 @@ export default function MisReservasPage() {
   function handleLogout() {
     logoutUser()
     router.push("/")
+  }
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 3500)
+  }
+
+  async function handleCancel(documentId: string | undefined) {
+    if (!documentId) return
+    if (!confirm("¿Cancelar esta reserva? Esta acción no se puede deshacer.")) return
+    setCancellingId(documentId)
+    try {
+      await updateReservationStatus(documentId, "cancelled")
+      setReservations((prev) =>
+        prev.map((r) => r.documentId === documentId ? { ...r, reservationStatus: "cancelled" } : r)
+      )
+      showToast("Reserva cancelada", true)
+    } catch {
+      showToast("No se pudo cancelar la reserva", false)
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   return (
@@ -155,9 +179,19 @@ export default function MisReservasPage() {
                         </span>
                       </div>
                       {status === "draft" && (
-                        <p className="mt-3 text-xs font-dm-sans text-viella-brown bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
-                          Tu reserva está pendiente de confirmación. Te contactaremos para coordinar el pago.
-                        </p>
+                        <div className="mt-3 flex items-start justify-between gap-3 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
+                          <p className="text-xs font-dm-sans text-viella-brown">
+                            Tu reserva está pendiente de confirmación. Te contactaremos para coordinar el pago.
+                          </p>
+                          <button
+                            onClick={() => handleCancel(r.documentId)}
+                            disabled={cancellingId === r.documentId}
+                            className="flex items-center gap-1 font-dm-sans text-xs text-red-600 hover:text-red-800 disabled:opacity-50 shrink-0 transition-colors"
+                          >
+                            <XCircle size={13} />
+                            {cancellingId === r.documentId ? "Cancelando..." : "Cancelar"}
+                          </button>
+                        </div>
                       )}
                     </CardContent>
                   </Card>
@@ -169,6 +203,14 @@ export default function MisReservasPage() {
         </div>
       </div>
       <Footer />
+
+      {toast && (
+        <div className={`fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg font-dm-sans text-sm text-white z-50
+          ${toast.ok ? "bg-green-600" : "bg-red-600"}`}>
+          {toast.ok ? <CheckCircle size={15} /> : <AlertCircle size={15} />}
+          {toast.msg}
+        </div>
+      )}
     </>
   )
 }
