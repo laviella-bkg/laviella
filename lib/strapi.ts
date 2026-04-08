@@ -649,3 +649,101 @@ export async function submitContactMessage(data: {
     noAuth: true,
   });
 }
+// ============================================================================
+// ADMIN
+// ============================================================================
+
+export interface AdminReservationFilters {
+  status?: string[]
+  domoId?: number
+  search?: string
+  checkInFrom?: string
+  checkInTo?: string
+}
+
+export interface AdminMetrics {
+  pending: number
+  checkInsToday: number
+  revenueThisMonth: number
+  upcomingArrivals: Reservation[]
+  recentReservations: Reservation[]
+}
+
+export async function getReservationsForAdmin(
+  filters?: AdminReservationFilters
+): Promise<Reservation[]> {
+  const params = new URLSearchParams()
+  params.set('populate', 'domo')
+  params.set('sort', 'createdAt:desc')
+  params.set('pagination[pageSize]', '100')
+
+  if (filters?.status?.length) {
+    filters.status.forEach((s, i) =>
+      params.set(`filters[reservationStatus][$in][${i}]`, s)
+    )
+  }
+  if (filters?.domoId) {
+    params.set('filters[domo][id][$eq]', String(filters.domoId))
+  }
+  if (filters?.search) {
+    params.set('filters[$or][0][guestName][$containsi]', filters.search)
+    params.set('filters[$or][1][guestEmail][$containsi]', filters.search)
+  }
+  if (filters?.checkInFrom) {
+    params.set('filters[checkIn][$gte]', filters.checkInFrom)
+  }
+  if (filters?.checkInTo) {
+    params.set('filters[checkIn][$lte]', filters.checkInTo)
+  }
+
+  const res = await fetchAPI<StrapiData<Reservation>[]>(
+    `/reservations?${params.toString()}`,
+    { useAuth: true }
+  )
+  return normalizeStrapiArray<Reservation>(res.data)
+}
+
+export async function updateReservationStatus(
+  id: number,
+  status: string
+): Promise<Reservation> {
+  const res = await fetchAPI<StrapiData<Reservation>>(`/reservations/${id}`, {
+    method: 'PUT',
+    useAuth: true,
+    body: JSON.stringify({ data: { reservationStatus: status } }),
+  })
+  return normalizeStrapiData(res.data) as Reservation
+}
+
+export async function getAdminDashboardMetrics(): Promise<AdminMetrics> {
+  const today = new Date().toISOString().split('T')[0]
+  const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    .toISOString()
+    .split('T')[0]
+
+  const [allActive, todayArrivals, monthConfirmed] = await Promise.all([
+    getReservationsForAdmin({ status: ['draft', 'confirmed'] }),
+    getReservationsForAdmin({ status: ['confirmed'], checkInFrom: today, checkInTo: today }),
+    getReservationsForAdmin({ status: ['confirmed'], checkInFrom: firstOfMonth }),
+  ])
+
+  const pending = allActive.filter((r) => r.reservationStatus === 'draft').length
+  const revenueThisMonth = monthConfirmed.reduce((sum, r) => sum + (r.totalPrice || 0), 0)
+
+  const upcoming = allActive
+    .filter((r) => r.reservationStatus === 'confirmed' && (r.checkIn as string) >= today)
+    .sort((a, b) => ((a.checkIn as string) > (b.checkIn as string) ? 1 : -1))
+    .slice(0, 5)
+
+  const recent = [...allActive]
+    .sort((a, b) => ((a.id ?? 0) > (b.id ?? 0) ? -1 : 1))
+    .slice(0, 5)
+
+  return {
+    pending,
+    checkInsToday: todayArrivals.length,
+    revenueThisMonth,
+    upcomingArrivals: upcoming,
+    recentReservations: recent,
+  }
+}
