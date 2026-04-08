@@ -727,10 +727,10 @@ export async function getReservationsForAdmin(
 }
 
 export async function updateReservationStatus(
-  id: number,
+  documentId: string,
   status: string
 ): Promise<Reservation> {
-  const res = await fetchAPI<StrapiData<Reservation>>(`/reservations/${id}`, {
+  const res = await fetchAPI<StrapiData<Reservation>>(`/reservations/${documentId}`, {
     method: 'PUT',
     useAuth: true,
     body: JSON.stringify({ data: { reservationStatus: status } }),

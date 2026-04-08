@@ -103,6 +103,7 @@ export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 
 export interface Reservation {
   id?: number;
+  documentId?: string;
   domo?: Domo | number;
   guestName: string;
   guestEmail: string;
