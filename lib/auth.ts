@@ -19,6 +19,7 @@ export interface LoginResponse {
     id: number;
     username: string;
     email: string;
+    role?: { id: number; name: string; type: string };
     [key: string]: any;
   };
 }
@@ -36,7 +37,7 @@ export interface RegisterData {
  * Login user and get JWT token
  */
 export async function loginUser(credentials: LoginCredentials): Promise<LoginResponse> {
-  const response = await fetch(`${STRAPI_URL}/api/auth/local`, {
+  const response = await fetch(`${STRAPI_URL}/api/auth/local?populate=role`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -128,6 +129,14 @@ export function getCurrentUser(): LoginResponse['user'] | null {
  */
 export function isAuthenticated(): boolean {
   return getJWT() !== null;
+}
+
+/**
+ * Check if current user has admin role
+ */
+export function isAdmin(): boolean {
+  const user = getCurrentUser();
+  return user?.role?.type === 'admin';
 }
 
 /**
