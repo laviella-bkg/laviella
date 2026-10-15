@@ -1,126 +1,70 @@
-// Authentication utilities for Strapi JWT tokens
+// Autenticación de huéspedes contra Payload (colección `guests`).
+// El token vive en una cookie HTTP-only que setea Payload; en localStorage solo se guarda
+// el nombre y email para mostrarlos en la UI.
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-/**
- * User login credentials
- */
 export interface LoginCredentials {
-  identifier: string; // email or username
+  identifier: string; // email
   password: string;
 }
 
-/**
- * Login response from Strapi
- */
-export interface LoginResponse {
-  jwt: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    isAdmin?: boolean;
-    [key: string]: any;
-  };
-}
-
-/**
- * Register user data
- */
 export interface RegisterData {
   username: string;
   email: string;
   password: string;
 }
 
-/**
- * Login user and get JWT token
- */
-export async function loginUser(credentials: LoginCredentials): Promise<LoginResponse> {
-  const response = await fetch(`${STRAPI_URL}/api/auth/local`, {
+export interface GuestUser {
+  id: number;
+  username: string;
+  email: string;
+}
+
+async function request(path: string, body?: unknown) {
+  const response = await fetch(`/api/guests${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
+    credentials: 'include',
+    body: body ? JSON.stringify(body) : undefined,
   });
-
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: { message: response.statusText } }));
-    throw new Error(error.error?.message || 'Login failed');
+    throw new Error(data?.errors?.[0]?.message || response.statusText);
   }
-
-  const data: LoginResponse = await response.json();
-
-  // Fetch full user to get isAdmin field
-  const meResponse = await fetch(`${STRAPI_URL}/api/users/me`, {
-    headers: { 'Authorization': `Bearer ${data.jwt}` },
-  });
-  if (meResponse.ok) {
-    const me = await meResponse.json();
-    data.user = { ...data.user, isAdmin: me.isAdmin ?? false };
-  }
-
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('jwt', data.jwt);
-    localStorage.setItem('user', JSON.stringify(data.user));
-  }
-
   return data;
 }
 
-/**
- * Register a new user
- */
-export async function registerUser(userData: RegisterData): Promise<LoginResponse> {
-  const response = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData),
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: { message: response.statusText } }));
-    throw new Error(error.error?.message || 'Registration failed');
-  }
-
-  const data: LoginResponse = await response.json();
-  
-  // Store JWT in localStorage
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('jwt', data.jwt);
-    localStorage.setItem('user', JSON.stringify(data.user));
-  }
-  
-  return data;
+function storeUser(user: { id: number; email: string; name?: string | null }): GuestUser {
+  const guest = { id: user.id, email: user.email, username: user.name || user.email };
+  localStorage.setItem('user', JSON.stringify(guest));
+  return guest;
 }
 
-/**
- * Logout user (remove JWT from localStorage)
- */
-export function logoutUser(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('user');
-  }
-}
-
-/**
- * Get current JWT token
- */
-export function getJWT(): string | null {
-  if (typeof window === 'undefined') return null;
+export async function loginUser({ identifier, password }: LoginCredentials): Promise<GuestUser> {
   try {
-    return localStorage.getItem('jwt');
+    const data = await request('/login', { email: identifier.trim().toLowerCase(), password });
+    return storeUser(data.user);
   } catch {
-    return null;
+    throw new Error('Email o contraseña incorrectos');
   }
 }
 
-/**
- * Get current user data
- */
-export function getCurrentUser(): LoginResponse['user'] | null {
+export async function registerUser({ username, email, password }: RegisterData): Promise<GuestUser> {
+  try {
+    await request('', { name: username.trim(), email: email.trim().toLowerCase(), password });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : '';
+    throw new Error(/email/i.test(message) ? 'Ya existe una cuenta con ese email' : 'No se pudo crear la cuenta');
+  }
+  return loginUser({ identifier: email, password });
+}
+
+export function logoutUser(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('user');
+  request('/logout').catch(() => {});
+}
+
+export function getCurrentUser(): GuestUser | null {
   if (typeof window === 'undefined') return null;
   try {
     const userStr = localStorage.getItem('user');
@@ -130,36 +74,7 @@ export function getCurrentUser(): LoginResponse['user'] | null {
   }
 }
 
-/**
- * Check if user is authenticated
- */
+/** Indicador para la UI; la sesión real la valida el servidor con la cookie */
 export function isAuthenticated(): boolean {
-  return getJWT() !== null;
-}
-
-/**
- * Check if current user has admin access
- */
-export function isAdmin(): boolean {
-  const user = getCurrentUser();
-  return user?.isAdmin === true;
-}
-
-/**
- * Verify JWT token is still valid
- */
-export async function verifyToken(): Promise<boolean> {
-  const jwt = getJWT();
-  if (!jwt) return false;
-
-  try {
-    const response = await fetch(`${STRAPI_URL}/api/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`,
-      },
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
+  return getCurrentUser() !== null;
 }

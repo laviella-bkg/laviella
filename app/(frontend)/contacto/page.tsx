@@ -1,0 +1,123 @@
+'use client'
+
+import { useState } from 'react'
+import { NavBar } from '@/components/sections/nav-bar'
+import { Footer } from '@/components/sections/footer'
+import { useToast } from '@/components/ui/use-toast'
+import { Toaster } from '@/components/ui/toaster'
+import { submitContactMessage } from '@/lib/actions'
+
+export default function ContactoPage() {
+  const { toast } = useToast()
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const form = e.currentTarget
+    const formData = new FormData(form)
+
+    setLoading(true)
+    try {
+      const result = await submitContactMessage({
+        nombre: formData.get('nombre') as string,
+        email: formData.get('email') as string,
+        telefono: formData.get('telefono') as string || undefined,
+        mensaje: formData.get('mensaje') as string,
+      })
+      if (!result.ok) throw new Error(result.error)
+      setSubmitted(true)
+      toast({
+        title: '¡Mensaje enviado!',
+        description: 'Te contactaremos pronto.',
+      })
+    } catch {
+      toast({
+        title: 'Error al enviar',
+        description: 'No pudimos enviar tu mensaje. Intentá de nuevo.',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <NavBar />
+      <div className="min-h-screen bg-viella-sand">
+        {/* Header */}
+        <div className="bg-viella-deep py-16 text-center">
+          <p className="font-dancing text-viella-brown text-lg mb-2">escribinos</p>
+          <h1 className="font-cormorant font-semibold text-viella-cream text-5xl">
+            Contacto
+          </h1>
+        </div>
+
+        <main className="max-w-2xl mx-auto px-6 py-16">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-viella-cream rounded-lg p-8 shadow-sm space-y-6"
+          >
+            <div>
+              <label className="block font-dm-sans text-viella-deep text-xs uppercase tracking-widest mb-2">
+                Nombre
+              </label>
+              <input
+                type="text"
+                name="nombre"
+                required
+                disabled={submitted}
+                className="w-full border border-viella-beige bg-transparent px-4 py-3 font-dm-sans text-viella-deep text-sm focus:outline-none focus:border-viella-accent transition-colors disabled:opacity-50"
+              />
+            </div>
+            <div>
+              <label className="block font-dm-sans text-viella-deep text-xs uppercase tracking-widest mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                required
+                disabled={submitted}
+                className="w-full border border-viella-beige bg-transparent px-4 py-3 font-dm-sans text-viella-deep text-sm focus:outline-none focus:border-viella-accent transition-colors disabled:opacity-50"
+              />
+            </div>
+            <div>
+              <label className="block font-dm-sans text-viella-deep text-xs uppercase tracking-widest mb-2">
+                Teléfono <span className="normal-case text-viella-brown">(opcional)</span>
+              </label>
+              <input
+                type="tel"
+                name="telefono"
+                disabled={submitted}
+                className="w-full border border-viella-beige bg-transparent px-4 py-3 font-dm-sans text-viella-deep text-sm focus:outline-none focus:border-viella-accent transition-colors disabled:opacity-50"
+              />
+            </div>
+            <div>
+              <label className="block font-dm-sans text-viella-deep text-xs uppercase tracking-widest mb-2">
+                Mensaje
+              </label>
+              <textarea
+                name="mensaje"
+                required
+                rows={5}
+                disabled={submitted}
+                className="w-full border border-viella-beige bg-transparent px-4 py-3 font-dm-sans text-viella-deep text-sm focus:outline-none focus:border-viella-accent transition-colors resize-none disabled:opacity-50"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitted || loading}
+              className="w-full bg-viella-accent text-viella-cream font-dm-sans text-xs uppercase tracking-widest py-4 hover:bg-viella-deep transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitted ? 'Enviado' : loading ? 'Enviando...' : 'Enviar mensaje'}
+            </button>
+          </form>
+        </main>
+      </div>
+      <Footer />
+      <Toaster />
+    </>
+  )
+}

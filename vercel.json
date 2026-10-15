@@ -1,0 +1,4 @@
+{
+  "buildCommand": "pnpm payload migrate && pnpm build",
+  "crons": [{ "path": "/api/cron", "schedule": "0 5 * * *" }]
+}

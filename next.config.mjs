@@ -1,3 +1,5 @@
+import { withPayload } from '@payloadcms/next/withPayload'
+
 /** @type {import('next').NextConfig} */
 
 const securityHeaders = [
@@ -16,14 +18,18 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.strapiapp.com https://*.media.strapiapp.com http://localhost:1337",
-      "connect-src 'self' https://*.strapiapp.com http://localhost:1337",
+      "img-src 'self' data: blob: https://images.unsplash.com https://*.public.blob.vercel-storage.com",
+      "connect-src 'self'",
       "frame-ancestors 'none'",
     ].join('; '),
   },
 ]
 
 const nextConfig = {
+  async redirects() {
+    // El admin propio se reemplazó por el de Payload
+    return [{ source: '/admin/:path*', destination: '/cms', permanent: false }]
+  },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }]
   },
@@ -31,30 +37,15 @@ const nextConfig = {
     unoptimized: false, // Cambiar a true solo si usas Vercel sin optimización de imágenes
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '1337',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.strapi.app',
-        pathname: '/uploads/**',
-      },
-      {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
       {
         protocol: 'https',
-        hostname: 'better-addition-cf5edce2eb.strapiapp.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.media.strapiapp.com',
+        hostname: '*.public.blob.vercel-storage.com',
       },
     ],
   },
 }
 
-export default nextConfig
+export default withPayload(nextConfig, { devBundleServerPackages: false })
