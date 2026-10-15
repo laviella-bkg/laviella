@@ -63,21 +63,41 @@ export type SupportedTimezones =
 
 export interface Config {
   auth: {
+    guests: GuestAuthOperations;
     users: UserAuthOperations;
   };
   blocks: {};
   collections: {
-    users: User;
+    domos: Domo;
+    reservations: Reservation;
+    seasons: Season;
+    testimonials: Testimonial;
+    pages: Page;
+    'contact-messages': ContactMessage;
     media: Media;
+    guests: Guest;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    domos: {
+      reservations: 'reservations';
+      testimonials: 'testimonials';
+    };
+  };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    domos: DomosSelect<false> | DomosSelect<true>;
+    reservations: ReservationsSelect<false> | ReservationsSelect<true>;
+    seasons: SeasonsSelect<false> | SeasonsSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    guests: GuestsSelect<false> | GuestsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -87,16 +107,38 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'home-page': HomePage;
+  };
+  globalsSelect: {
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: Guest | User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
+  };
+}
+export interface GuestAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
   };
 }
 export interface UserAuthOperations {
@@ -116,6 +158,223 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "domos".
+ */
+export interface Domo {
+  id: number;
+  name: string;
+  /**
+   * Se genera desde el nombre si se deja vacío
+   */
+  slug: string;
+  isActive?: boolean | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  capacity: number;
+  basePrice: number;
+  mainImage?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  features?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  amenities?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  location?: string | null;
+  checkInTime?: string | null;
+  checkOutTime?: string | null;
+  /**
+   * Se sincroniza cada hora para bloquear fechas reservadas en Booking
+   */
+  bookingIcalUrl?: string | null;
+  reservations?: {
+    docs?: (number | Reservation)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  testimonials?: {
+    docs?: (number | Testimonial)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reservations".
+ */
+export interface Reservation {
+  id: number;
+  domo: number | Domo;
+  checkIn: string;
+  checkOut: string;
+  guestName: string;
+  guestEmail: string;
+  guestPhone?: string | null;
+  numberOfGuests: number;
+  totalPrice: number;
+  reservationStatus: 'draft' | 'confirmed' | 'cancelled' | 'completed' | 'blocked';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  specialRequests?: string | null;
+  /**
+   * UID del evento de Booking (iCal)
+   */
+  externalId?: string | null;
+  /**
+   * ID del evento en Google Calendar
+   */
+  calendarEventId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  guestName: string;
+  isApproved?: boolean | null;
+  rating?: number | null;
+  comment: string;
+  guestImage?: (number | null) | Media;
+  domo?: (number | null) | Domo;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seasons".
+ */
+export interface Season {
+  id: number;
+  name: string;
+  isActive?: boolean | null;
+  startDate: string;
+  endDate: string;
+  /**
+   * Ej: 1.5 = 50% más caro que el precio base
+   */
+  priceMultiplier: number;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * Se genera desde el título si se deja vacío
+   */
+  slug: string;
+  isActive?: boolean | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  seoTitle?: string | null;
+  metaDescription?: string | null;
+  seoKeywords?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages".
+ */
+export interface ContactMessage {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono?: string | null;
+  mensaje: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guests".
+ */
+export interface Guest {
+  id: number;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'guests';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -145,26 +404,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  _objectKey?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -188,18 +427,51 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'domos';
+        value: number | Domo;
+      } | null)
+    | ({
+        relationTo: 'reservations';
+        value: number | Reservation;
+      } | null)
+    | ({
+        relationTo: 'seasons';
+        value: number | Season;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'contact-messages';
+        value: number | ContactMessage;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'guests';
+        value: number | Guest;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'guests';
+        value: number | Guest;
+      }
+    | {
+        relationTo: 'users';
+        value: number | User;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -209,10 +481,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'guests';
+        value: number | Guest;
+      }
+    | {
+        relationTo: 'users';
+        value: number | User;
+      };
   key?: string | null;
   value?:
     | {
@@ -239,9 +516,139 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "domos_select".
  */
-export interface UsersSelect<T extends boolean = true> {
+export interface DomosSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  isActive?: T;
+  description?: T;
+  capacity?: T;
+  basePrice?: T;
+  mainImage?: T;
+  gallery?: T;
+  features?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  amenities?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  location?: T;
+  checkInTime?: T;
+  checkOutTime?: T;
+  bookingIcalUrl?: T;
+  reservations?: T;
+  testimonials?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reservations_select".
+ */
+export interface ReservationsSelect<T extends boolean = true> {
+  domo?: T;
+  checkIn?: T;
+  checkOut?: T;
+  guestName?: T;
+  guestEmail?: T;
+  guestPhone?: T;
+  numberOfGuests?: T;
+  totalPrice?: T;
+  reservationStatus?: T;
+  paymentStatus?: T;
+  specialRequests?: T;
+  externalId?: T;
+  calendarEventId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seasons_select".
+ */
+export interface SeasonsSelect<T extends boolean = true> {
+  name?: T;
+  isActive?: T;
+  startDate?: T;
+  endDate?: T;
+  priceMultiplier?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  guestName?: T;
+  isApproved?: T;
+  rating?: T;
+  comment?: T;
+  guestImage?: T;
+  domo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  isActive?: T;
+  content?: T;
+  seoTitle?: T;
+  metaDescription?: T;
+  seoKeywords?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages_select".
+ */
+export interface ContactMessagesSelect<T extends boolean = true> {
+  nombre?: T;
+  email?: T;
+  telefono?: T;
+  mensaje?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guests_select".
+ */
+export interface GuestsSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -262,22 +669,26 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "users_select".
  */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  _objectKey?: T;
+export interface UsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -318,6 +729,86 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  heroTitle?: string | null;
+  heroSubtitle?: string | null;
+  heroCtaLabel?: string | null;
+  heroImage?: (number | null) | Media;
+  aboutTitle?: string | null;
+  aboutDescription?: string | null;
+  aboutLocationTitle?: string | null;
+  aboutLocationSubtitle?: string | null;
+  aboutClimaTitle?: string | null;
+  aboutClimaSubtitle?: string | null;
+  aboutImage?: (number | null) | Media;
+  serviciosTitle?: string | null;
+  serviciosSubtitle?: string | null;
+  servicios?:
+    | {
+        title: string;
+        description?: string | null;
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  ctaTitle?: string | null;
+  ctaDescription?: string | null;
+  ctaHoursWeekdaysLabel?: string | null;
+  ctaHoursWeekdays?: string | null;
+  ctaHoursWeekendLabel?: string | null;
+  ctaHoursWeekend?: string | null;
+  ctaAddress?: string | null;
+  ctaPhone?: string | null;
+  ctaEmail?: string | null;
+  ctaImage?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroSubtitle?: T;
+  heroCtaLabel?: T;
+  heroImage?: T;
+  aboutTitle?: T;
+  aboutDescription?: T;
+  aboutLocationTitle?: T;
+  aboutLocationSubtitle?: T;
+  aboutClimaTitle?: T;
+  aboutClimaSubtitle?: T;
+  aboutImage?: T;
+  serviciosTitle?: T;
+  serviciosSubtitle?: T;
+  servicios?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        id?: T;
+      };
+  ctaTitle?: T;
+  ctaDescription?: T;
+  ctaHoursWeekdaysLabel?: T;
+  ctaHoursWeekdays?: T;
+  ctaHoursWeekendLabel?: T;
+  ctaHoursWeekend?: T;
+  ctaAddress?: T;
+  ctaPhone?: T;
+  ctaEmail?: T;
+  ctaImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -6,8 +6,17 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { ContactMessages } from './cms/collections/ContactMessages'
+import { Domos } from './cms/collections/Domos'
+import { Guests } from './cms/collections/Guests'
 import { Media } from './cms/collections/Media'
+import { Pages } from './cms/collections/Pages'
+import { Reservations } from './cms/collections/Reservations'
+import { Seasons } from './cms/collections/Seasons'
+import { Testimonials } from './cms/collections/Testimonials'
 import { Users } from './cms/collections/Users'
+import { HomePage } from './cms/globals/HomePage'
+import { migrations } from './cms/migrations'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -22,7 +31,8 @@ export default buildConfig({
       importMapFile: path.resolve(dirname, 'app/(payload)/cms/importMap.js'),
     },
   },
-  collections: [Users, Media],
+  collections: [Domos, Reservations, Seasons, Testimonials, Pages, ContactMessages, Media, Guests, Users],
+  globals: [HomePage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -35,6 +45,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    migrationDir: path.resolve(dirname, 'cms/migrations'),
+    prodMigrations: migrations,
   }),
   sharp,
   plugins: [
