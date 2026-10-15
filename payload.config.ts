@@ -64,7 +64,8 @@ export default buildConfig({
   sharp,
   plugins: [
     vercelBlobStorage({
-      collections: { media: true },
+      // URLs directas al CDN de Blob (las imágenes son públicas)
+      collections: { media: { disablePayloadAccessControl: true } },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
   ],
