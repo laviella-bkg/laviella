@@ -1,0 +1,16 @@
+# Postgres local para desarrollo (producción usa Neon).
+# DATABASE_URL=postgres://laviella:laviella@localhost:5432/laviella
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: laviella
+      POSTGRES_PASSWORD: laviella
+      POSTGRES_DB: laviella
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

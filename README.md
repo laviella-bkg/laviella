@@ -37,6 +37,10 @@ pnpm payload migrate               # aplica migraciones (Vercel lo hace en el bu
 STRAPI_BACKUP_DIR=../_backup-strapi-2026-10-15 pnpm payload run scripts/import-strapi.ts  # importa el contenido de Strapi
 ```
 
+> ⚠️ Para correr cualquier comando de Payload contra la base de **producción**, usá siempre `NODE_ENV=production`.
+> Sin eso Payload arranca en modo dev, sincroniza el esquema solo y deja una marca que bloquea las migraciones siguientes.
+> El desarrollo local usa Postgres en Docker: `docker compose up -d`.
+
 ## 📋 Documentos Importantes
 
 - **Variables de Entorno**: Ver [docs/deployment/VERCEL_ENV_VARS.md](./docs/deployment/VERCEL_ENV_VARS.md)
