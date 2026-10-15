@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import path from 'path'
@@ -34,6 +35,18 @@ export default buildConfig({
   collections: [Domos, Reservations, Seasons, Testimonials, Pages, ContactMessages, Media, Guests, Users],
   globals: [HomePage],
   editor: lexicalEditor(),
+  // Sin GMAIL_APP_PASSWORD los emails se escriben en la consola
+  email: process.env.GMAIL_APP_PASSWORD
+    ? nodemailerAdapter({
+        defaultFromAddress: process.env.GMAIL_USER || 'laviella.glamp@gmail.com',
+        defaultFromName: 'La Viella Glamping',
+        skipVerify: true,
+        transportOptions: {
+          service: 'gmail',
+          auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+        },
+      })
+    : undefined,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'cms/payload-types.ts'),

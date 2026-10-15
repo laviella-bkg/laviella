@@ -11,12 +11,17 @@ export const slugFrom =
     value ||
     String(data?.[field] ?? '')
       .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
+      .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
 
-// Guarda fechas de día completo a las 12:00 UTC para evitar corrimientos por zona horaria
-export const dayOnly: FieldHook = ({ value }) =>
-  value ? `${String(value).slice(0, 10)}T12:00:00.000Z` : value
+// Fechas de día completo se guardan a las 12:00 UTC para evitar corrimientos por zona horaria
+export function toNoonUTC(value: string): string
+export function toNoonUTC(value: unknown): string | undefined
+export function toNoonUTC(value: unknown) {
+  return value ? `${String(value).slice(0, 10)}T12:00:00.000Z` : undefined
+}
+
+export const dayOnly: FieldHook = ({ value }) => toNoonUTC(value)

@@ -1,6 +1,7 @@
 import type { Access, CollectionConfig } from 'payload'
 
 import { dayOnly, isAdmin } from '../access'
+import { checkOverlap, notifyAndSyncCalendar } from '../hooks/reservations'
 
 // Admin ve todo; un huésped solo sus propias reservas
 const adminOrOwnGuest: Access = ({ req }) => {
@@ -25,13 +26,15 @@ export const Reservations: CollectionConfig = {
   hooks: {
     beforeChange: [
       // Un huésped solo puede cancelar su reserva, no modificar otros campos
-      ({ data, originalDoc, req, operation }) => {
-        if (operation === 'update' && req.user?.collection === 'guests') {
+      ({ data, originalDoc, req, operation, context }) => {
+        if (operation === 'update' && req.user?.collection === 'guests' && !context.internal) {
           return { ...originalDoc, reservationStatus: 'cancelled' }
         }
         return data
       },
+      checkOverlap,
     ],
+    afterChange: [notifyAndSyncCalendar],
   },
   fields: [
     { name: 'domo', label: 'Domo', type: 'relationship', relationTo: 'domos', required: true },
