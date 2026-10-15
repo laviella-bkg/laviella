@@ -1,3 +1,5 @@
+import { withPayload } from '@payloadcms/next/withPayload'
+
 /** @type {import('next').NextConfig} */
 
 const securityHeaders = [
@@ -16,7 +18,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.strapiapp.com https://*.media.strapiapp.com http://localhost:1337",
+      "img-src 'self' data: blob: https://images.unsplash.com https://*.strapiapp.com https://*.media.strapiapp.com http://localhost:1337 https://*.public.blob.vercel-storage.com",
       "connect-src 'self' https://*.strapiapp.com http://localhost:1337",
       "frame-ancestors 'none'",
     ].join('; '),
@@ -53,8 +55,12 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.media.strapiapp.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
     ],
   },
 }
 
-export default nextConfig
+export default withPayload(nextConfig, { devBundleServerPackages: false })
