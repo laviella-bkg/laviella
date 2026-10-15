@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, isAdmin, slugFrom } from '../access'
+import { revalidateHooks } from '../hooks/revalidate'
 
 export const Domos: CollectionConfig = {
   slug: 'domos',
@@ -9,6 +10,7 @@ export const Domos: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'capacity', 'basePrice', 'isActive'],
   },
+  hooks: revalidateHooks,
   access: {
     read: anyone,
     create: isAdmin,

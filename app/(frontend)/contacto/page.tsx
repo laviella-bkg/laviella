@@ -5,7 +5,7 @@ import { NavBar } from '@/components/sections/nav-bar'
 import { Footer } from '@/components/sections/footer'
 import { useToast } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
-import { submitContactMessage } from '@/lib/strapi'
+import { submitContactMessage } from '@/lib/actions'
 
 export default function ContactoPage() {
   const { toast } = useToast()
@@ -19,12 +19,13 @@ export default function ContactoPage() {
 
     setLoading(true)
     try {
-      await submitContactMessage({
+      const result = await submitContactMessage({
         nombre: formData.get('nombre') as string,
         email: formData.get('email') as string,
         telefono: formData.get('telefono') as string || undefined,
         mensaje: formData.get('mensaje') as string,
       })
+      if (!result.ok) throw new Error(result.error)
       setSubmitted(true)
       toast({
         title: '¡Mensaje enviado!',

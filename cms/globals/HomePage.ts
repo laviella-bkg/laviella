@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone, isAdmin } from '../access'
+import { revalidateHooks } from '../hooks/revalidate'
 
 export const HomePage: GlobalConfig = {
   slug: 'home-page',
   label: 'Página de inicio',
+  hooks: { afterChange: revalidateHooks.afterChange },
   access: {
     read: anyone,
     update: isAdmin,

@@ -1,4 +1,5 @@
-import { getDomos, getStrapiMediaUrl, getTestimonials, getHomePage } from '@/lib/strapi'
+import { getDomos, getTestimonials, getHomePage } from '@/lib/cms'
+import { getMediaUrl } from '@/lib/utils/cms'
 import { NavBar } from '@/components/sections/nav-bar'
 import { HeroSection } from '@/components/sections/hero-section'
 import { IntroSection } from '@/components/sections/intro-section'
@@ -8,7 +9,10 @@ import { ServiciosSection } from '@/components/sections/servicios-section'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
 import { CTASection } from '@/components/sections/cta-section'
 import { Footer } from '@/components/sections/footer'
-import type { Testimonial, HomePageContent } from '@/lib/types/strapi'
+import type { Domo, Testimonial, HomePageContent } from '@/lib/types/cms'
+
+// Estática; Payload la invalida al editar contenido. Revalida cada hora como respaldo.
+export const revalidate = 3600
 
 function DomosSection({ domos }: { domos: ShowcaseDomo[] }) {
   return (
@@ -36,7 +40,7 @@ function DomosSection({ domos }: { domos: ShowcaseDomo[] }) {
 }
 
 export default async function HomePage() {
-  let domos: any[] = []
+  let domos: Domo[] = []
   let testimonials: Testimonial[] = []
   let homeContent: HomePageContent | null = null
   let heroImageUrl: string | null = null
@@ -55,19 +59,19 @@ export default async function HomePage() {
     if (domos.length) {
       const domoImages = domos
         .flatMap((domo) => [
-          getStrapiMediaUrl(domo.mainImage),
-          ...(Array.isArray(domo.gallery) ? domo.gallery.map((item: any) => getStrapiMediaUrl(item)) : []),
+          getMediaUrl(domo.mainImage),
+          ...(Array.isArray(domo.gallery) ? domo.gallery.map((item) => getMediaUrl(item)) : []),
         ])
         .filter(Boolean)
 
       heroImageUrl = homeContent?.heroImage
-        ? getStrapiMediaUrl(homeContent.heroImage)
+        ? getMediaUrl(homeContent.heroImage)
         : (domoImages[0] ?? null)
       aboutImageUrl = homeContent?.aboutImage
-        ? getStrapiMediaUrl(homeContent.aboutImage)
+        ? getMediaUrl(homeContent.aboutImage)
         : (domoImages[1] ?? domoImages[0] ?? null)
       ctaImageUrl = homeContent?.ctaImage
-        ? getStrapiMediaUrl(homeContent.ctaImage)
+        ? getMediaUrl(homeContent.ctaImage)
         : (domoImages[5] ?? domoImages[0] ?? null)
       experienceImages = [domoImages[2] ?? domoImages[0] ?? null, domoImages[3] ?? domoImages[1] ?? null, domoImages[4] ?? domoImages[0] ?? null]
 
@@ -82,7 +86,7 @@ export default async function HomePage() {
           domo.basePrice != null ? `$${domo.basePrice} usd x noche` : undefined,
         note:
           domo.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140),
-        imageUrl: getStrapiMediaUrl(domo.mainImage) || domoImages[0] || undefined,
+        imageUrl: getMediaUrl(domo.mainImage) || domoImages[0] || undefined,
       }))
     }
   } catch {
@@ -117,7 +121,7 @@ export default async function HomePage() {
         items={homeContent?.servicios?.map((s) => ({
           title: s.title,
           description: s.description,
-          imageUrl: s.image ? getStrapiMediaUrl(s.image) : null,
+          imageUrl: s.image ? getMediaUrl(s.image) : null,
         }))}
       />
       <TestimonialsSection testimonials={testimonials} />

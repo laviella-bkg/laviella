@@ -1,11 +1,12 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import sanitizeHtml from "sanitize-html"
-import { getPage, getPages } from "@/lib/strapi"
+import { getPage, getPages } from "@/lib/cms"
 import { NavBar } from "@/components/sections/nav-bar"
 import { Footer } from "@/components/sections/footer"
 
 export const dynamicParams = true // Allow dynamic params to handle 404 gracefully
+export const revalidate = 3600
 
 // Generate static params for all pages at build time (optional)
 export async function generateStaticParams() {
@@ -15,7 +16,7 @@ export async function generateStaticParams() {
       slug: page.slug,
     }))
   } catch (error) {
-    // If Strapi is not available during build, return empty array
+    // If the CMS is not available during build, return empty array
     // Pages will be generated on-demand
     console.warn("Could not generate static params for pages:", error)
     return []

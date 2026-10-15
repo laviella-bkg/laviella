@@ -9,9 +9,9 @@ import { Footer } from "@/components/sections/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getReservations, updateReservationStatus } from "@/lib/strapi"
-import { getCurrentUser, isAuthenticated, logoutUser } from "@/lib/auth"
-import type { Reservation } from "@/lib/types/strapi"
+import { cancelMyReservation, getMyReservations } from "@/lib/actions"
+import { getCurrentUser, logoutUser } from "@/lib/auth"
+import type { Reservation } from "@/lib/types/cms"
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Pendiente de confirmación",
@@ -38,22 +38,22 @@ export default function MisReservasPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<{ username: string; email: string } | null>(null)
-  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [cancellingId, setCancellingId] = useState<number | null>(null)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      router.replace("/login")
-      return
-    }
-    const currentUser = getCurrentUser()
-    setUser(currentUser as any)
+    setUser(getCurrentUser())
 
-    getReservations({
-      guestEmail: currentUser?.email,
-      reservationStatus: ["draft", "confirmed", "completed", "cancelled"],
-    })
-      .then((data) => setReservations(data))
+    // El servidor valida la sesión con la cookie y devuelve solo las reservas del huésped
+    getMyReservations()
+      .then((data) => {
+        if (!data) {
+          logoutUser()
+          router.replace("/login")
+          return
+        }
+        setReservations(data)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [router])
@@ -68,14 +68,17 @@ export default function MisReservasPage() {
     setTimeout(() => setToast(null), 3500)
   }
 
-  async function handleCancel(documentId: string | undefined) {
-    if (!documentId) return
+  async function handleCancel(id: number) {
     if (!confirm("¿Cancelar esta reserva? Esta acción no se puede deshacer.")) return
-    setCancellingId(documentId)
+    setCancellingId(id)
     try {
-      await updateReservationStatus(documentId, "cancelled")
+      const result = await cancelMyReservation(id)
+      if (!result.ok) {
+        showToast(result.error, false)
+        return
+      }
       setReservations((prev) =>
-        prev.map((r) => r.documentId === documentId ? { ...r, reservationStatus: "cancelled" } : r)
+        prev.map((r) => r.id === id ? { ...r, reservationStatus: "cancelled" } : r)
       )
       showToast("Reserva cancelada", true)
     } catch {
@@ -140,7 +143,7 @@ export default function MisReservasPage() {
             <div className="space-y-4">
               {reservations.map((r) => {
                 const status = r.reservationStatus || "draft"
-                const domoName = (r.domo as any)?.name || "Domo"
+                const domoName = r.domo?.name || "Domo"
                 return (
                   <Card key={r.id} className="border-viella-beige shadow-sm hover:shadow-md transition-shadow">
                     <CardHeader className="pb-3">
@@ -157,11 +160,11 @@ export default function MisReservasPage() {
                       <div className="grid grid-cols-2 gap-3 text-sm font-dm-sans text-viella-brown mb-4">
                         <div className="flex items-center gap-2">
                           <Calendar size={14} className="text-viella-accent shrink-0" />
-                          <span>Check-in: <strong className="text-viella-deep">{formatDate(r.checkIn as string)}</strong></span>
+                          <span>Check-in: <strong className="text-viella-deep">{formatDate(r.checkIn)}</strong></span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar size={14} className="text-viella-accent shrink-0" />
-                          <span>Check-out: <strong className="text-viella-deep">{formatDate(r.checkOut as string)}</strong></span>
+                          <span>Check-out: <strong className="text-viella-deep">{formatDate(r.checkOut)}</strong></span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Users size={14} className="text-viella-accent shrink-0" />
@@ -184,12 +187,12 @@ export default function MisReservasPage() {
                             Tu reserva está pendiente de confirmación. Te contactaremos para coordinar el pago.
                           </p>
                           <button
-                            onClick={() => handleCancel(r.documentId)}
-                            disabled={cancellingId === r.documentId}
+                            onClick={() => handleCancel(r.id)}
+                            disabled={cancellingId === r.id}
                             className="flex items-center gap-1 font-dm-sans text-xs text-red-600 hover:text-red-800 disabled:opacity-50 shrink-0 transition-colors"
                           >
                             <XCircle size={13} />
-                            {cancellingId === r.documentId ? "Cancelando..." : "Cancelar"}
+                            {cancellingId === r.id ? "Cancelando..." : "Cancelar"}
                           </button>
                         </div>
                       )}

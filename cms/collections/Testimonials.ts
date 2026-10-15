@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAdmin } from '../access'
+import { revalidateHooks } from '../hooks/revalidate'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
@@ -9,6 +10,7 @@ export const Testimonials: CollectionConfig = {
     useAsTitle: 'guestName',
     defaultColumns: ['guestName', 'rating', 'domo', 'isApproved'],
   },
+  hooks: revalidateHooks,
   access: {
     // El público solo ve los aprobados
     read: ({ req }) => req.user?.collection === 'users' || { isApproved: { equals: true } },

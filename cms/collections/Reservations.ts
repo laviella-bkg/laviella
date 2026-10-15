@@ -2,6 +2,7 @@ import type { Access, CollectionConfig } from 'payload'
 
 import { dayOnly, isAdmin } from '../access'
 import { checkOverlap, notifyAndSyncCalendar } from '../hooks/reservations'
+import { revalidateHooks } from '../hooks/revalidate'
 
 // Admin ve todo; un huésped solo sus propias reservas
 const adminOrOwnGuest: Access = ({ req }) => {
@@ -34,7 +35,8 @@ export const Reservations: CollectionConfig = {
       },
       checkOverlap,
     ],
-    afterChange: [notifyAndSyncCalendar],
+    afterChange: [notifyAndSyncCalendar, ...revalidateHooks.afterChange],
+    afterDelete: revalidateHooks.afterDelete,
   },
   fields: [
     { name: 'domo', label: 'Domo', type: 'relationship', relationTo: 'domos', required: true },

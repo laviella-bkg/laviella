@@ -28,7 +28,7 @@ export function NavBar() {
 
   useEffect(() => {
     if (isAuthenticated()) {
-      setUser(getCurrentUser() as any)
+      setUser(getCurrentUser())
     }
   }, [])
 

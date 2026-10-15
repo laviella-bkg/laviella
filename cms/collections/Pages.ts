@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, isAdmin, slugFrom } from '../access'
+import { revalidateHooks } from '../hooks/revalidate'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -9,6 +10,7 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'isActive'],
   },
+  hooks: revalidateHooks,
   access: {
     read: anyone,
     create: isAdmin,

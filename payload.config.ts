@@ -17,7 +17,6 @@ import { Seasons } from './cms/collections/Seasons'
 import { Testimonials } from './cms/collections/Testimonials'
 import { Users } from './cms/collections/Users'
 import { HomePage } from './cms/globals/HomePage'
-import { migrations } from './cms/migrations'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -58,8 +57,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Las migraciones corren en el build de Vercel (ver vercel.json), no al iniciar
     migrationDir: path.resolve(dirname, 'cms/migrations'),
-    prodMigrations: migrations,
   }),
   sharp,
   plugins: [

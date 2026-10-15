@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react'
 import { SectionHeader } from './section-header'
-import type { Testimonial } from '@/lib/types/strapi'
+import type { Testimonial } from '@/lib/types/cms'
 
 type LandingTestimonial = Pick<Testimonial, 'guestName' | 'rating' | 'comment' | 'domo'> & {
   id?: number
@@ -20,7 +20,7 @@ function TestimonialCard({ testimonial }: { testimonial: LandingTestimonial }) {
           </p>
           {testimonial.domo && (
             <p className="mt-0.5 font-dm-sans text-xs font-light text-viella-brown">
-              {(testimonial.domo as any)?.name ?? ''}
+              {testimonial.domo.name}
             </p>
           )}
         </div>

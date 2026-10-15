@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, dayOnly, isAdmin } from '../access'
+import { revalidateHooks } from '../hooks/revalidate'
 
 export const Seasons: CollectionConfig = {
   slug: 'seasons',
@@ -9,6 +10,7 @@ export const Seasons: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'startDate', 'endDate', 'priceMultiplier', 'isActive'],
   },
+  hooks: revalidateHooks,
   access: {
     read: anyone,
     create: isAdmin,
