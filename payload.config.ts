@@ -2,6 +2,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { es } from '@payloadcms/translations/languages/es'
 import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -30,6 +31,11 @@ export default buildConfig({
       baseDir: dirname,
       importMapFile: path.resolve(dirname, 'app/(payload)/cms/importMap.js'),
     },
+  },
+  // Panel en español (lo usa el dueño del glamping)
+  i18n: {
+    supportedLanguages: { es },
+    fallbackLanguage: 'es',
   },
   collections: [Domos, Reservations, Seasons, Testimonials, Pages, ContactMessages, Media, Guests, Users],
   globals: [HomePage],
