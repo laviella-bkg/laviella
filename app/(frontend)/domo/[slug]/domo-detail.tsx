@@ -5,7 +5,8 @@ import DOMPurify from "isomorphic-dompurify"
 import Link from "next/link"
 import Image from "next/image"
 import type { DateRange } from "react-day-picker"
-import { calculatePrice, getMediaUrl, toDateKey } from "@/lib/utils/cms"
+import { calculatePrice, formatUSD, getMediaUrl, toDateKey } from "@/lib/utils/cms"
+import { PriceSummary } from "@/components/price-summary"
 import type { Domo, Season, Testimonial } from "@/lib/types/cms"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,9 +40,9 @@ export function DomoDetail({
   const priceCalculation = useMemo(
     () =>
       dateRange?.from && dateRange?.to
-        ? calculatePrice(domo.basePrice, seasons, toDateKey(dateRange.from), toDateKey(dateRange.to))
+        ? calculatePrice(domo, guests, seasons, toDateKey(dateRange.from), toDateKey(dateRange.to))
         : null,
-    [dateRange, domo.basePrice, seasons]
+    [dateRange, domo, guests, seasons]
   )
 
   const normalizedDomo = domo
@@ -59,7 +60,7 @@ export function DomoDetail({
         imageUrl={mainImage}
         scriptText="glamping & domos"
         title={normalizedDomo.name}
-        subtitle={`${normalizedDomo.capacity} huéspedes · desde $${normalizedDomo.basePrice}/noche`}
+        subtitle={`${normalizedDomo.capacity} huéspedes · desde ${formatUSD(normalizedDomo.basePrice)}/noche`}
         ctaLabel="Reservar este domo"
         ctaHref={`/reservas?domo=${normalizedDomo.slug}`}
         height="60vh"
@@ -96,8 +97,8 @@ export function DomoDetail({
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-cormorant text-3xl font-bold text-viella-accent">${normalizedDomo.basePrice}</div>
-                <div className="font-dm-sans text-viella-brown">por noche</div>
+                <div className="font-cormorant text-3xl font-bold text-viella-accent">{formatUSD(normalizedDomo.basePrice)}</div>
+                <div className="font-dm-sans text-viella-brown">por noche · 2 personas</div>
               </div>
             </div>
           </div>
@@ -288,46 +289,12 @@ export function DomoDetail({
                   {/* Price Summary */}
                   {dateRange?.from && dateRange?.to && (
                     <div className="space-y-2 pt-4 border-t border-viella-beige">
-                      {priceCalculation ? (
-                        <>
-                          {priceCalculation.seasons.length > 0 && (
-                            <div className="space-y-1 mb-2">
-                              {priceCalculation.seasons.map((season, idx) => (
-                                <div key={idx} className="flex justify-between text-sm font-dm-sans">
-                                  <span className="text-viella-brown">
-                                    Temporada ({season.nights} noche{season.nights !== 1 ? 's' : ''})
-                                  </span>
-                                  <span className="text-viella-deep">${season.price.toFixed(2)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex justify-between font-dm-sans text-viella-deep">
-                            <span>
-                              ${priceCalculation.basePrice} x {priceCalculation.nights} noche{priceCalculation.nights !== 1 ? 's' : ''}
-                            </span>
-                            <span>${priceCalculation.subtotal.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
-                            <span>Limpieza</span>
-                            <span>${priceCalculation.fees?.cleaning?.toFixed(2) ?? '0.00'}</span>
-                          </div>
-                          <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
-                            <span>Tasas</span>
-                            <span>${priceCalculation.fees?.taxes?.toFixed(2) ?? '0.00'}</span>
-                          </div>
-                          <Separator className="bg-viella-beige" />
-                          <div className="flex justify-between font-dm-sans font-semibold text-lg">
-                            <span className="text-viella-deep">Total</span>
-                            <span className="text-viella-accent">${priceCalculation.total.toFixed(2)}</span>
-                          </div>
-                        </>
-                      ) : null}
+                      {priceCalculation && <PriceSummary price={priceCalculation} />}
                     </div>
                   )}
 
                   {/* Book Button */}
-                  <Link href={`/reservas?domo=${normalizedDomo.slug}${dateRange?.from && dateRange?.to ? `&checkIn=${toDateKey(dateRange.from)}&checkOut=${toDateKey(dateRange.to)}` : ''}`}>
+                  <Link href={`/reservas?domo=${normalizedDomo.slug}${dateRange?.from && dateRange?.to ? `&checkIn=${toDateKey(dateRange.from)}&checkOut=${toDateKey(dateRange.to)}` : ''}&guests=${guests}`}>
                     <Button
                       className="w-full bg-viella-accent text-viella-cream hover:bg-viella-deep font-dm-sans"
                       size="lg"

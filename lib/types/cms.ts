@@ -15,6 +15,8 @@ export interface Domo {
   description: string; // HTML generado desde el editor
   capacity: number;
   basePrice: number;
+  weekendPrice?: number;
+  extraGuestPrice?: number;
   isActive: boolean;
   features: string[];
   amenities: string[];
@@ -109,20 +111,7 @@ export interface HomePageContent {
 }
 
 export interface PriceCalculation {
-  basePrice: number;
   nights: number;
-  pricePerNight: number[];
-  seasons: Array<{
-    startDate: string;
-    endDate: string;
-    multiplier: number;
-    nights: number;
-    price: number;
-  }>;
-  subtotal: number;
-  fees: {
-    cleaning?: number;
-    taxes?: number;
-  };
+  lines: Array<{ label: string; amount: number }>;
   total: number;
 }

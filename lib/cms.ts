@@ -30,6 +30,8 @@ function mapDomo(d: PayloadDomo): Domo {
     description: toHTML(d.description),
     capacity: d.capacity,
     basePrice: d.basePrice,
+    weekendPrice: d.weekendPrice ?? undefined,
+    extraGuestPrice: d.extraGuestPrice ?? undefined,
     isActive: d.isActive ?? true,
     features: (d.features ?? []).map((f) => f.text),
     amenities: (d.amenities ?? []).map((a) => a.text),

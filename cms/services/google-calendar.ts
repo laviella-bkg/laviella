@@ -38,7 +38,7 @@ function buildEvent(r: CalendarReservation) {
     `Email: ${r.guestEmail}`,
     r.guestPhone ? `Teléfono: ${r.guestPhone}` : null,
     `Huéspedes: ${r.numberOfGuests}`,
-    `Total: $${r.totalPrice?.toLocaleString('es-AR')}`,
+    `Total: U$S ${r.totalPrice?.toLocaleString('es-AR')}`,
     r.specialRequests ? `Solicitudes: ${r.specialRequests}` : null,
   ].filter(Boolean)
 

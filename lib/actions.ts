@@ -44,7 +44,13 @@ export async function createReservation(input: {
   }
 
   // El precio se calcula en el servidor, no se confía en el que muestra el navegador
-  const { total } = calculatePrice(domo.basePrice, await getSeasons(), input.checkIn, input.checkOut)
+  const { total } = calculatePrice(
+    { basePrice: domo.basePrice, weekendPrice: domo.weekendPrice ?? undefined, extraGuestPrice: domo.extraGuestPrice ?? undefined },
+    numberOfGuests,
+    await getSeasons(),
+    input.checkIn,
+    input.checkOut,
+  )
 
   try {
     await payload.create({
@@ -57,7 +63,7 @@ export async function createReservation(input: {
         checkIn: input.checkIn,
         checkOut: input.checkOut,
         numberOfGuests,
-        totalPrice: Math.round(total * 100) / 100,
+        totalPrice: total,
         specialRequests: input.specialRequests?.trim() || undefined,
         reservationStatus: 'draft',
         paymentStatus: 'pending',

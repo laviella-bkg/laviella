@@ -34,7 +34,33 @@ export const Domos: CollectionConfig = {
       type: 'row',
       fields: [
         { name: 'capacity', label: 'Capacidad', type: 'number', required: true, min: 1 },
-        { name: 'basePrice', label: 'Precio base por noche', type: 'number', required: true, min: 0 },
+        {
+          name: 'basePrice',
+          label: 'Precio por noche (U$S)',
+          type: 'number',
+          required: true,
+          min: 0,
+          admin: { description: 'Base doble: incluye 2 personas.' },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'weekendPrice',
+          label: 'Precio noche de fin de semana (U$S)',
+          type: 'number',
+          min: 0,
+          admin: { description: 'Viernes y sábado, con late check-out. Vacío = precio por noche.' },
+        },
+        {
+          name: 'extraGuestPrice',
+          label: 'Persona adicional por noche (U$S)',
+          type: 'number',
+          min: 0,
+          admin: { description: 'Se suma por cada huésped a partir del tercero. Vacío = sin cargo.' },
+        },
       ],
     },
     { name: 'mainImage', label: 'Imagen principal', type: 'upload', relationTo: 'media' },

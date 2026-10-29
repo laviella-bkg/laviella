@@ -38,7 +38,7 @@ export function guestEmail(r: EmailReservation) {
             <tr><td style="padding: 6px 0; color: #71665c;">Check-in</td><td style="text-align: right;"><strong>${formatDate(r.checkIn)}</strong></td></tr>
             <tr><td style="padding: 6px 0; color: #71665c;">Check-out</td><td style="text-align: right;"><strong>${formatDate(r.checkOut)}</strong></td></tr>
             <tr><td style="padding: 6px 0; color: #71665c;">Huéspedes</td><td style="text-align: right;"><strong>${r.numberOfGuests}</strong></td></tr>
-            <tr style="border-top: 1px solid #dbd5cc;"><td style="padding: 10px 0 0; font-weight: 600;">Total estimado</td><td style="text-align: right; font-weight: 600; padding-top: 10px;">$${r.totalPrice}</td></tr>
+            <tr style="border-top: 1px solid #dbd5cc;"><td style="padding: 10px 0 0; font-weight: 600;">Total estimado</td><td style="text-align: right; font-weight: 600; padding-top: 10px;">U$S ${r.totalPrice}</td></tr>
           </table>
           ${r.specialRequests ? `<p style="margin-top: 16px; font-size: 13px; color: #71665c;"><em>Pedidos especiales: ${escape(r.specialRequests)}</em></p>` : ''}
         </div>
@@ -66,7 +66,7 @@ export function adminEmail(r: EmailReservation, to: string) {
           <tr><td style="padding: 8px 0; color: #71665c;">Check-in</td><td><strong>${formatDate(r.checkIn)}</strong></td></tr>
           <tr><td style="padding: 8px 0; color: #71665c;">Check-out</td><td><strong>${formatDate(r.checkOut)}</strong></td></tr>
           <tr><td style="padding: 8px 0; color: #71665c;">Huéspedes</td><td><strong>${r.numberOfGuests}</strong></td></tr>
-          <tr><td style="padding: 8px 0; color: #71665c;">Total</td><td><strong>$${r.totalPrice}</strong></td></tr>
+          <tr><td style="padding: 8px 0; color: #71665c;">Total</td><td><strong>U$S ${r.totalPrice}</strong></td></tr>
           ${r.specialRequests ? `<tr><td style="padding: 8px 0; color: #71665c;">Pedidos especiales</td><td>${escape(r.specialRequests)}</td></tr>` : ''}
         </table>
         <p style="margin-top: 24px;">

@@ -187,7 +187,18 @@ export interface Domo {
     [k: string]: unknown;
   } | null;
   capacity: number;
+  /**
+   * Base doble: incluye 2 personas.
+   */
   basePrice: number;
+  /**
+   * Viernes y sábado, con late check-out. Vacío = precio por noche.
+   */
+  weekendPrice?: number | null;
+  /**
+   * Se suma por cada huésped a partir del tercero. Vacío = sin cargo.
+   */
+  extraGuestPrice?: number | null;
   mainImage?: (number | null) | Media;
   gallery?: (number | Media)[] | null;
   features?:
@@ -525,6 +536,8 @@ export interface DomosSelect<T extends boolean = true> {
   description?: T;
   capacity?: T;
   basePrice?: T;
+  weekendPrice?: T;
+  extraGuestPrice?: T;
   mainImage?: T;
   gallery?: T;
   features?:
@@ -764,7 +777,13 @@ export interface HomePage {
   ctaHoursWeekendLabel?: string | null;
   ctaHoursWeekend?: string | null;
   ctaAddress?: string | null;
+  /**
+   * También se usa en el footer y en el WhatsApp de "¿Necesitas ayuda?" en Reservas.
+   */
   ctaPhone?: string | null;
+  /**
+   * También se usa en el footer y en "¿Necesitas ayuda?" en Reservas.
+   */
   ctaEmail?: string | null;
   ctaImage?: (number | null) | Media;
   updatedAt?: string | null;

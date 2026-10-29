@@ -1,5 +1,5 @@
 import { getDomos, getTestimonials, getHomePage } from '@/lib/cms'
-import { getMediaUrl } from '@/lib/utils/cms'
+import { formatUSD, getMediaUrl } from '@/lib/utils/cms'
 import { NavBar } from '@/components/sections/nav-bar'
 import { HeroSection } from '@/components/sections/hero-section'
 import { IntroSection } from '@/components/sections/intro-section'
@@ -82,7 +82,7 @@ export default async function HomePage() {
             ? `${domo.capacity} ${domo.capacity === 1 ? 'adulto' : 'adultos'}`
             : undefined,
         priceLabel:
-          domo.basePrice != null ? `$${domo.basePrice} usd x noche` : undefined,
+          domo.basePrice != null ? `${formatUSD(domo.basePrice)} x noche · 2 personas` : undefined,
         note:
           domo.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140),
         imageUrl: getMediaUrl(domo.mainImage) || domoImages[0] || undefined,

@@ -177,7 +177,7 @@ export default function MisReservasPage() {
                       <div className="flex items-center justify-between pt-3 border-t border-viella-beige">
                         <span className="font-dm-sans text-viella-brown text-sm">Total</span>
                         <span className="font-cormorant text-xl font-semibold text-viella-accent">
-                          ${r.totalPrice?.toLocaleString("es-AR")}
+                          U$S {r.totalPrice?.toLocaleString("es-AR")}
                         </span>
                       </div>
                       {status === "draft" && (

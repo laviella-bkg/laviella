@@ -27,7 +27,8 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { checkAvailability, createReservation } from "@/lib/actions"
-import { calculatePrice, getMediaUrl, toDateKey } from "@/lib/utils/cms"
+import { calculatePrice, formatUSD, getMediaUrl, toDateKey } from "@/lib/utils/cms"
+import { PriceSummary } from "@/components/price-summary"
 import type { Domo, Season } from "@/lib/types/cms"
 import { NavBar } from "@/components/sections/nav-bar"
 
@@ -53,7 +54,9 @@ export function ReservasContent({
         slug: domo.slug,
         capacity: `${domo.capacity || 2} personas`,
         maxCapacity: domo.capacity || 2,
-        price: domo.basePrice || 100,
+        price: domo.basePrice,
+        weekendPrice: domo.weekendPrice,
+        extraGuestPrice: domo.extraGuestPrice,
         description: domo.description || "",
         features: domo.features,
         image: domo.mainImage,
@@ -133,6 +136,8 @@ export function ReservasContent({
     const domoSlug = searchParams.get('domo')
     const checkIn = searchParams.get('checkIn')
     const checkOut = searchParams.get('checkOut')
+    const guestsParam = Number(searchParams.get('guests'))
+    if (guestsParam >= 1) setGuests(guestsParam)
 
     if (domoSlug && domos.length > 0) {
       const domo = domos.find(d => d.slug === domoSlug)
@@ -152,17 +157,22 @@ export function ReservasContent({
   const priceCalculation = useMemo(
     () =>
       selectedDomo && selectedDates?.from && selectedDates?.to
-        ? calculatePrice(selectedDomo.price, seasons, toDateKey(selectedDates.from), toDateKey(selectedDates.to))
+        ? calculatePrice(
+            { basePrice: selectedDomo.price, weekendPrice: selectedDomo.weekendPrice, extraGuestPrice: selectedDomo.extraGuestPrice },
+            guests,
+            seasons,
+            toDateKey(selectedDates.from),
+            toDateKey(selectedDates.to)
+          )
         : null,
-    [selectedDomo, selectedDates, seasons]
+    [selectedDomo, selectedDates, guests, seasons]
   )
-  const loadingPrice = false
 
   const selectedDomoData = selectedDomo
   const nights = selectedDates && selectedDates.from && selectedDates.to
     ? Math.ceil((selectedDates.to.getTime() - selectedDates.from.getTime()) / (1000 * 60 * 60 * 24))
     : 0
-  const totalPrice = priceCalculation?.total || (selectedDomoData ? selectedDomoData.price * nights + 40 : 0)
+  const totalPrice = priceCalculation?.total ?? 0
 
   const handleSubmitReservation = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -204,14 +214,7 @@ export function ReservasContent({
 
       setSubmitSuccess(true)
       setShowBookingForm(false)
-
-      // Reset form
-      setTimeout(() => {
-        setSubmitSuccess(false)
-        setFormData({ guestName: "", guestEmail: "", guestPhone: "", specialRequests: "" })
-        setSelectedDates(undefined)
-        setSelectedDomo(null)
-      }, 3000)
+      window.scrollTo({ top: 0 })
 
     } catch (err) {
       console.error("Error creating reservation:", err)
@@ -262,14 +265,6 @@ export function ReservasContent({
 
         {/* Contenido principal */}
         <main className="max-w-6xl mx-auto px-6 py-12">
-          {/* Success Message */}
-          {submitSuccess && (
-            <div className="mb-6 bg-viella-accent/10 border border-viella-accent rounded-lg p-4 flex items-center gap-3">
-              <Check className="h-5 w-5 text-viella-accent" />
-              <p className="text-viella-accent font-dm-sans font-medium">¡Reserva creada exitosamente! Te contactaremos pronto.</p>
-            </div>
-          )}
-
           {/* Error Message */}
           {submitError && (
             <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
@@ -286,6 +281,43 @@ export function ReservasContent({
             <div className="text-center py-20">
               <p className="text-red-600 font-dm-sans">{error}</p>
             </div>
+          ) : submitSuccess ? (
+            <Card className="mx-auto max-w-2xl shadow-lg border-viella-beige">
+              <CardHeader className="text-center">
+                <Check className="mx-auto mb-2 h-10 w-10 text-viella-accent" />
+                <CardTitle className="font-cormorant text-3xl text-viella-deep">¡Recibimos tu solicitud!</CardTitle>
+                <CardDescription className="font-dm-sans text-viella-brown">
+                  Te enviamos un email con el detalle. Te vamos a contactar para confirmar la reserva y coordinar el pago.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-1 rounded-lg bg-viella-beige/30 p-4 font-dm-sans text-viella-deep">
+                  <p><strong>Domo:</strong> {selectedDomoData?.name}</p>
+                  {selectedDates?.from && selectedDates?.to && (
+                    <p><strong>Fechas:</strong> {selectedDates.from.toLocaleDateString()} - {selectedDates.to.toLocaleDateString()}</p>
+                  )}
+                  <p><strong>Huéspedes:</strong> {guests}</p>
+                  <p><strong>Total estimado:</strong> {formatUSD(totalPrice)}</p>
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button asChild className="flex-1 bg-viella-accent text-viella-cream hover:bg-viella-deep font-dm-sans">
+                    <Link href="/">Volver al inicio</Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 font-dm-sans border-viella-beige text-viella-brown hover:bg-viella-sand"
+                    onClick={() => {
+                      setSubmitSuccess(false)
+                      setFormData({ guestName: "", guestEmail: "", guestPhone: "", specialRequests: "" })
+                      setSelectedDates(undefined)
+                      setSelectedDomo(null)
+                    }}
+                  >
+                    Hacer otra reserva
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Left Column - Date Selection and Domos */}
@@ -386,8 +418,8 @@ export function ReservasContent({
                                 </CardDescription>
                               </div>
                               <div className="text-right">
-                                <div className="text-2xl font-cormorant font-semibold text-viella-accent">${domo.price}</div>
-                                <div className="text-sm font-dm-sans text-viella-brown">por noche</div>
+                                <div className="text-2xl font-cormorant font-semibold text-viella-accent">{formatUSD(domo.price)}</div>
+                                <div className="text-sm font-dm-sans text-viella-brown">por noche · 2 personas</div>
                               </div>
                             </div>
 
@@ -496,70 +528,7 @@ export function ReservasContent({
                         {nights > 0 && (
                           <>
                             <Separator className="bg-viella-beige" />
-                            <div className="space-y-2">
-                              {loadingPrice ? (
-                                <div className="flex items-center justify-center py-4">
-                                  <Loader2 className="h-4 w-4 animate-spin text-viella-accent" />
-                                  <span className="ml-2 text-sm font-dm-sans text-viella-brown">Calculando precio...</span>
-                                </div>
-                              ) : priceCalculation ? (
-                                <>
-                                  {priceCalculation.seasons.length > 0 && (
-                                    <div className="space-y-1 mb-2">
-                                      {priceCalculation.seasons.map((season: any, idx: number) => (
-                                        <div key={idx} className="flex justify-between text-sm font-dm-sans">
-                                          <span className="text-viella-brown">
-                                            Temporada ({season.nights} noche{season.nights !== 1 ? 's' : ''}) x{season.multiplier.toFixed(2)}
-                                          </span>
-                                          <span className="text-viella-deep">${season.price.toFixed(2)}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                  <div className="flex justify-between font-dm-sans text-viella-deep">
-                                    <span>
-                                      ${priceCalculation.basePrice} x {priceCalculation.nights} noche{priceCalculation.nights !== 1 ? "s" : ""}
-                                    </span>
-                                    <span>${priceCalculation.subtotal.toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
-                                    <span>Limpieza</span>
-                                    <span>${priceCalculation.fees?.cleaning?.toFixed(2) ?? '0.00'}</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
-                                    <span>Tasas</span>
-                                    <span>${priceCalculation.fees?.taxes?.toFixed(2) ?? '0.00'}</span>
-                                  </div>
-                                  <Separator className="bg-viella-beige" />
-                                  <div className="flex justify-between font-dm-sans font-semibold text-lg">
-                                    <span className="text-viella-deep">Total</span>
-                                    <span className="text-viella-accent">${priceCalculation.total.toFixed(2)}</span>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <div className="flex justify-between font-dm-sans text-viella-deep">
-                                    <span>
-                                      ${selectedDomoData.price} x {nights} noche{nights !== 1 ? "s" : ""}
-                                    </span>
-                                    <span>${(selectedDomoData.price * nights).toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
-                                    <span>Limpieza</span>
-                                    <span>$25.00</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm font-dm-sans text-viella-brown">
-                                    <span>Tasas</span>
-                                    <span>$15.00</span>
-                                  </div>
-                                  <Separator className="bg-viella-beige" />
-                                  <div className="flex justify-between font-dm-sans font-semibold text-lg">
-                                    <span className="text-viella-deep">Total</span>
-                                    <span className="text-viella-accent">${totalPrice.toFixed(2)}</span>
-                                  </div>
-                                </>
-                              )}
-                            </div>
+                            {priceCalculation && <PriceSummary price={priceCalculation} />}
                           </>
                         )}
 
@@ -619,7 +588,7 @@ export function ReservasContent({
               <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto border-viella-beige">
                 <CardHeader>
                   <CardTitle className="font-cormorant text-viella-deep">Completar Reserva</CardTitle>
-                  <CardDescription className="font-dm-sans text-viella-brown">Ingresa tus datos para confirmar la reserva</CardDescription>
+                  <CardDescription className="font-dm-sans text-viella-brown">Ingresá tus datos y te contactamos para confirmar la reserva y coordinar el pago</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmitReservation} className="space-y-6">
@@ -694,7 +663,7 @@ export function ReservasContent({
                         <strong>Huéspedes:</strong> {guests}
                       </p>
                       <p className="font-dm-sans text-viella-deep">
-                        <strong>Total:</strong> ${totalPrice}
+                        <strong>Total estimado:</strong> {formatUSD(totalPrice)}
                       </p>
                     </div>
 
@@ -711,8 +680,8 @@ export function ReservasContent({
                           </>
                         ) : (
                           <>
-                            <CreditCard className="mr-2 h-4 w-4" />
-                            Proceder al Pago
+                            <Check className="mr-2 h-4 w-4" />
+                            Solicitar reserva
                           </>
                         )}
                       </Button>
