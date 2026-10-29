@@ -21,7 +21,7 @@ function DomosSection({ domos }: { domos: ShowcaseDomo[] }) {
         <SectionHeader
           scriptText="Nuestros domos"
           title="Un refugio para cada plan"
-          subtitle="Tres maneras de vivir La Viella: retiro en pareja, escapada compartida o una celebración rodeada de paisaje."
+          subtitle="Distintas maneras de vivir La Viella: retiro en pareja, escapada compartida o una celebración rodeada de paisaje."
         />
         {domos.length ? (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -75,7 +75,7 @@ export default async function HomePage() {
         : (domoImages[5] ?? domoImages[0] ?? null)
       experienceImages = [domoImages[2] ?? domoImages[0] ?? null, domoImages[3] ?? domoImages[1] ?? null, domoImages[4] ?? domoImages[0] ?? null]
 
-      showcaseDomos = domos.slice(0, 3).map((domo) => ({
+      showcaseDomos = domos.map((domo) => ({
         name: domo.name,
         slug: domo.slug,
         capacityLabel:

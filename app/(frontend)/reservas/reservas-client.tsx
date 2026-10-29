@@ -32,7 +32,17 @@ import type { Domo, Season } from "@/lib/types/cms"
 import { NavBar } from "@/components/sections/nav-bar"
 import { Footer } from "@/components/sections/footer"
 
-export function ReservasContent({ initialDomos, seasons }: { initialDomos: Domo[]; seasons: Season[] }) {
+export function ReservasContent({
+  initialDomos,
+  seasons,
+  phone = "+54 223 423 5266",
+  email = "laviella.glamp@gmail.com",
+}: {
+  initialDomos: Domo[]
+  seasons: Season[]
+  phone?: string
+  email?: string
+}) {
   const searchParams = useSearchParams()
 
   // Domos formateados para la UI (vienen del servidor)
@@ -652,7 +662,7 @@ export function ReservasContent({ initialDomos, seasons }: { initialDomos: Domo[
                       <Input
                         type="tel"
                         name="guestPhone"
-                        placeholder="+34 123 456 789"
+                        placeholder="+54 223 123 4567"
                         value={formData.guestPhone}
                         onChange={handleFormChange}
                         required
@@ -738,7 +748,7 @@ export function ReservasContent({ initialDomos, seasons }: { initialDomos: Domo[
                     </div>
                     <div>
                       <label className="block text-sm font-dm-sans font-medium text-viella-deep mb-2">WhatsApp / Teléfono</label>
-                      <Input type="tel" placeholder="+34 123 456 789" />
+                      <Input type="tel" placeholder="+54 223 123 4567" />
                     </div>
                     <div>
                       <label className="block text-sm font-dm-sans font-medium text-viella-deep mb-2">Consulta</label>
@@ -790,18 +800,18 @@ export function ReservasContent({ initialDomos, seasons }: { initialDomos: Domo[
                     <Button
                       variant="outline"
                       className="w-full justify-start font-dm-sans bg-transparent border-viella-accent text-viella-accent hover:bg-viella-beige/30"
-                      onClick={() => window.open("https://wa.me/34123456789", "_blank")}
+                      onClick={() => window.open(`https://wa.me/${phone.replace(/\D/g, "")}`, "_blank")}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
-                      WhatsApp: +34 123 456 789
+                      WhatsApp: {phone}
                     </Button>
                     <Button
                       variant="outline"
                       className="w-full justify-start font-dm-sans bg-transparent border-viella-accent text-viella-accent hover:bg-viella-beige/30"
-                      onClick={() => window.open("mailto:reservas@laviellaglamping.com")}
+                      onClick={() => window.open(`mailto:${email}`)}
                     >
                       <CalendarIcon className="h-4 w-4 mr-2" />
-                      Email: reservas@laviellaglamping.com
+                      Email: {email}
                     </Button>
                   </div>
                 </CardContent>
