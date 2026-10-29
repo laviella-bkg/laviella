@@ -17,7 +17,7 @@ export function Footer({
   const contactInfo = {
     phone,
     email,
-    instagram: 'https://www.instagram.com/',
+    instagram: 'https://www.instagram.com/laviella.glamp',
     whatsapp: `https://wa.me/${phone.replace(/\D/g, '')}`,
     tiktok: null as string | null,
   }
