@@ -20,7 +20,6 @@ import {
 } from "lucide-react"
 import { NavBar } from "@/components/sections/nav-bar"
 import { HeroSection } from "@/components/sections/hero-section"
-import { Footer } from "@/components/sections/footer"
 
 export function DomoDetail({
   domo,
@@ -347,7 +346,6 @@ export function DomoDetail({
           </div>
         </div>
       </div>
-      <Footer />
     </>
   )
 }

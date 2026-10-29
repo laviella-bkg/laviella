@@ -8,7 +8,6 @@ import { DomoCard, type ShowcaseDomo } from '@/components/sections/domo-card'
 import { ServiciosSection } from '@/components/sections/servicios-section'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
 import { CTASection } from '@/components/sections/cta-section'
-import { Footer } from '@/components/sections/footer'
 import type { Domo, Testimonial, HomePageContent } from '@/lib/types/cms'
 
 // Estática; Payload la invalida al editar contenido. Revalida cada hora como respaldo.
@@ -137,7 +136,6 @@ export default async function HomePage() {
         phone={homeContent?.ctaPhone}
         email={homeContent?.ctaEmail}
       />
-      <Footer />
     </>
   )
 }

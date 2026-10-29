@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, DM_Sans, Dancing_Script } from 'next/font/google'
+import { getHomePage } from '@/lib/cms'
+import { Footer } from '@/components/sections/footer'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -29,18 +31,23 @@ export const metadata: Metadata = {
   description: 'Domos glamping en las Sierras de Córdoba. Un refugio íntimo donde la aventura y la comodidad se encuentran en plena naturaleza.',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const home = await getHomePage().catch(() => null)
+
   return (
     <html
       lang="es"
       suppressHydrationWarning
       className={`${cormorant.variable} ${dmSans.variable} ${dancingScript.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Footer phone={home?.ctaPhone} email={home?.ctaEmail} />
+      </body>
     </html>
   )
 }

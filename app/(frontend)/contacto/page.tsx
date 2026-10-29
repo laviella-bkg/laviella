@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { NavBar } from '@/components/sections/nav-bar'
-import { Footer } from '@/components/sections/footer'
 import { useToast } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import { submitContactMessage } from '@/lib/actions'
@@ -116,7 +115,6 @@ export default function ContactoPage() {
           </form>
         </main>
       </div>
-      <Footer />
       <Toaster />
     </>
   )

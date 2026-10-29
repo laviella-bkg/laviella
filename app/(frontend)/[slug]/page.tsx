@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import sanitizeHtml from "sanitize-html"
 import { getPage, getPages } from "@/lib/cms"
 import { NavBar } from "@/components/sections/nav-bar"
-import { Footer } from "@/components/sections/footer"
 
 export const dynamicParams = true // Allow dynamic params to handle 404 gracefully
 export const revalidate = 3600
@@ -89,7 +88,6 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
           />
         </main>
       </div>
-      <Footer />
     </>
   )
 }

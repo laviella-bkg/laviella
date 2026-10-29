@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Calendar, MapPin, Users, LogOut, XCircle, AlertCircle, CheckCircle } from "lucide-react"
 import { NavBar } from "@/components/sections/nav-bar"
-import { Footer } from "@/components/sections/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -205,7 +204,6 @@ export default function MisReservasPage() {
 
         </div>
       </div>
-      <Footer />
 
       {toast && (
         <div className={`fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg font-dm-sans text-sm text-white z-50

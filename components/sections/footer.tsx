@@ -7,15 +7,20 @@ const navLinks = [
   { href: '/#reservas', label: 'Reservas' },
 ]
 
-const contactInfo = {
-  phone: '+54 223 423 5266',
-  email: 'laviella.glamp@gmail.com',
-  instagram: 'https://www.instagram.com/',
-  whatsapp: 'https://wa.me/542234235266',
-  tiktok: null as string | null,
-}
-
-export function Footer() {
+export function Footer({
+  phone = '+54 223 423 5266',
+  email = 'laviella.glamp@gmail.com',
+}: {
+  phone?: string
+  email?: string
+}) {
+  const contactInfo = {
+    phone,
+    email,
+    instagram: 'https://www.instagram.com/',
+    whatsapp: `https://wa.me/${phone.replace(/\D/g, '')}`,
+    tiktok: null as string | null,
+  }
   const hasContactInfo = Object.values(contactInfo).some(Boolean)
 
   return (

@@ -30,7 +30,6 @@ import { checkAvailability, createReservation } from "@/lib/actions"
 import { calculatePrice, getMediaUrl, toDateKey } from "@/lib/utils/cms"
 import type { Domo, Season } from "@/lib/types/cms"
 import { NavBar } from "@/components/sections/nav-bar"
-import { Footer } from "@/components/sections/footer"
 
 export function ReservasContent({
   initialDomos,
@@ -820,7 +819,6 @@ export function ReservasContent({
           )}
         </main>
       </div>
-      <Footer />
     </>
   )
 }
